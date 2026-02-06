@@ -1,15 +1,15 @@
-function TodoModal({ categories, onClose, onSave }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [difficulty, setDifficulty] = useState(3);
+function TodoModal({ categories, onClose, onSave, editingTodo = null }) {
+  const [title, setTitle] = useState(editingTodo?.title || '');
+  const [description, setDescription] = useState(editingTodo?.description || '');
+  const [categoryId, setCategoryId] = useState(editingTodo?.category_id || '');
+  const [difficulty, setDifficulty] = useState(editingTodo?.difficulty || 3);
 
   return (
     <FormModal
-      title="New Todo"
+      title={editingTodo ? 'Edit Todo' : 'New Todo'}
       onClose={onClose}
-      onSubmit={() => onSave(title, description, categoryId || null, difficulty)}
-      submitText="Create"
+      onSubmit={() => onSave(title, description, categoryId || null, difficulty, editingTodo?.id)}
+      submitText={editingTodo ? 'Save' : 'Create'}
     >
       <div className="form-group">
         <label>Title *</label>
@@ -53,8 +53,9 @@ function TodoModal({ categories, onClose, onSave }) {
   );
 }
 
-function TodosPage({ todos, categories, onAdd, onDelete }) {
+function TodosPage({ todos, categories, onAdd, onDelete, onEdit }) {
   const [showModal, setShowModal] = useState(false);
+  const [editingTodo, setEditingTodo] = useState(null);
 
   return (
     <>
@@ -97,6 +98,16 @@ function TodosPage({ todos, categories, onAdd, onDelete }) {
               <div className="item-actions">
                 <button
                   className="icon-btn"
+                  onClick={() => {
+                    setEditingTodo(todo);
+                    setShowModal(true);
+                  }}
+                  title="Edit"
+                >
+                  ✏
+                </button>
+                <button
+                  className="icon-btn"
                   onClick={() => onDelete(todo.id)}
                   title="Delete"
                 >
@@ -108,14 +119,21 @@ function TodosPage({ todos, categories, onAdd, onDelete }) {
         })}
       </div>
 
-      <button className="add-btn" onClick={() => setShowModal(true)}>
+      <button className="add-btn" onClick={() => {
+        setEditingTodo(null);
+        setShowModal(true);
+      }}>
         +
       </button>
       {showModal && (
         <TodoModal
           categories={categories}
-          onClose={() => setShowModal(false)}
-          onSave={onAdd}
+          onClose={() => {
+            setShowModal(false);
+            setEditingTodo(null);
+          }}
+          onSave={editingTodo ? onEdit : onAdd}
+          editingTodo={editingTodo}
         />
       )}
     </>

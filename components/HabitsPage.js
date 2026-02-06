@@ -1,21 +1,21 @@
-function HabitModal({ categories, onClose, onSave }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [difficulty, setDifficulty] = useState(3);
+function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
+  const [title, setTitle] = useState(editingHabit?.title || '');
+  const [description, setDescription] = useState(editingHabit?.description || '');
+  const [categoryId, setCategoryId] = useState(editingHabit?.category_id || '');
+  const [difficulty, setDifficulty] = useState(editingHabit?.difficulty || 3);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(title, description, categoryId || null, difficulty);
+    onSave(title, description, categoryId || null, difficulty, editingHabit?.id);
     onClose();
   };
 
   return (
     <FormModal
-      title="New Habit"
+      title={editingHabit ? 'Edit Habit' : 'New Habit'}
       onClose={onClose}
-      onSubmit={() => onSave(title, description, categoryId || null, difficulty)}
-      submitText="Create"
+      onSubmit={() => onSave(title, description, categoryId || null, difficulty, editingHabit?.id)}
+      submitText={editingHabit ? 'Save' : 'Create'}
     >
       <div className="form-group">
         <label>Title *</label>
@@ -59,8 +59,9 @@ function HabitModal({ categories, onClose, onSave }) {
   );
 }
 
-function HabitsPage({ habits, categories, onAdd, onDelete }) {
+function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
   const [showModal, setShowModal] = useState(false);
+  const [editingHabit, setEditingHabit] = useState(null);
 
   return (
     <>
@@ -103,6 +104,16 @@ function HabitsPage({ habits, categories, onAdd, onDelete }) {
               <div className="item-actions">
                 <button
                   className="icon-btn"
+                  onClick={() => {
+                    setEditingHabit(habit);
+                    setShowModal(true);
+                  }}
+                  title="Edit"
+                >
+                  ✏
+                </button>
+                <button
+                  className="icon-btn"
                   onClick={() => onDelete(habit.id)}
                   title="Delete"
                 >
@@ -114,14 +125,21 @@ function HabitsPage({ habits, categories, onAdd, onDelete }) {
         })}
       </div>
 
-      <button className="add-btn" onClick={() => setShowModal(true)}>
+      <button className="add-btn" onClick={() => {
+        setEditingHabit(null);
+        setShowModal(true);
+      }}>
         +
       </button>
       {showModal && (
         <HabitModal
           categories={categories}
-          onClose={() => setShowModal(false)}
-          onSave={onAdd}
+          onClose={() => {
+            setShowModal(false);
+            setEditingHabit(null);
+          }}
+          onSave={editingHabit ? onEdit : onAdd}
+          editingHabit={editingHabit}
         />
       )}
     </>

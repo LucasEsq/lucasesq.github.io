@@ -1,10 +1,10 @@
-function CategoryModal({ onClose, onSave }) {
-  const [name, setName] = useState('');
-  const [color, setColor] = useState('#8b5a3c');
+function CategoryModal({ onClose, onSave, editingCategory = null }) {
+  const [name, setName] = useState(editingCategory?.name || '');
+  const [color, setColor] = useState(editingCategory?.color || '#8b5a3c');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(name, color);
+    onSave(name, color, editingCategory?.id);
     onClose();
   };
 
@@ -12,7 +12,7 @@ function CategoryModal({ onClose, onSave }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>New Category</h2>
+          <h2>{editingCategory ? 'Edit Category' : 'New Category'}</h2>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -49,7 +49,7 @@ function CategoryModal({ onClose, onSave }) {
               Cancel
             </button>
             <button type="submit" className="btn">
-              Create
+              {editingCategory ? 'Save' : 'Create'}
             </button>
           </div>
         </form>
@@ -59,20 +59,20 @@ function CategoryModal({ onClose, onSave }) {
 }
 
 // Alternative using the reusable FormModal component
-function CategoryModalReusable({ onClose, onSave }) {
-  const [name, setName] = useState('');
-  const [color, setColor] = useState('#8b5a3c');
+function CategoryModalReusable({ onClose, onSave, editingCategory = null }) {
+  const [name, setName] = useState(editingCategory?.name || '');
+  const [color, setColor] = useState(editingCategory?.color || '#8b5a3c');
 
   const handleSubmit = () => {
-    onSave(name, color);
+    onSave(name, color, editingCategory?.id);
   };
 
   return (
     <FormModal
-      title="New Category"
+      title={editingCategory ? 'Edit Category' : 'New Category'}
       onClose={onClose}
       onSubmit={handleSubmit}
-      submitText="Create"
+      submitText={editingCategory ? 'Save' : 'Create'}
     >
       <div className="form-group">
         <label>Name *</label>
@@ -98,8 +98,9 @@ function CategoryModalReusable({ onClose, onSave }) {
   );
 }
 
-function CategoriesPage({ categories, onAdd, onDelete }) {
+function CategoriesPage({ categories, onAdd, onDelete, onEdit }) {
   const [showModal, setShowModal] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
 
   return (
     <>
@@ -123,14 +124,32 @@ function CategoriesPage({ categories, onAdd, onDelete }) {
                   style={{ backgroundColor: category.color }}
                 />
                 <span className="category-name">{category.name}</span>
-                <button
-                  className="delete-category"
-                  onClick={() => onDelete(category.id)}
-                  title="Delete category"
+                <buttonicon-btn"
+                  onClick={() => {
+                    setEditingCategory(category);
+                    setShowModal(true);
+                  }}
+                  title="Edit category"
+                  style={{ padding: '0 0.5rem' }}
                 >
-                  ×
+                  ✏
                 </button>
-              </div>
+                <button
+                  className="
+                  className="delete-category"{
+        setEditingCategory(null);
+        setShowModal(true);
+      }}>
+        +
+      </button>
+      {showModal && (
+        <CategoryModal
+          onClose={() => {
+            setShowModal(false);
+            setEditingCategory(null);
+          }}
+          onSave={editingCategory ? onEdit : onAdd}
+          editingCategory={editingCategory
             ))}
           </div>
         )}

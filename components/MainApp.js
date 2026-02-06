@@ -87,6 +87,20 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
     setCategories(categories.filter((c) => c.id !== id));
   };
 
+  const editCategory = async (name, color, id) => {
+    const encryptedName = await encryption.encrypt(name, encryptionKey);
+    const { error } = await supabase
+      .from('categories')
+      .update({ name: encryptedName, color })
+      .eq('id', id);
+
+    if (!error) {
+      setCategories(categories.map((c) => 
+        c.id === id ? { ...c, name, color } : c
+      ));
+    }
+  };
+
   const addHabit = async (title, description, categoryId, difficulty) => {
     const encryptedTitle = await encryption.encrypt(title, encryptionKey);
     const encryptedDescription = description
@@ -116,11 +130,57 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
     setHabits(habits.filter((h) => h.id !== id));
   };
 
-  const addTodo = async (title, description, categoryId, difficulty) => {
+  const editHabit = async (title, description, categoryId, difficulty, id) => {
     const encryptedTitle = await encryption.encrypt(title, encryptionKey);
     const encryptedDescription = description
       ? await encryption.encrypt(description, encryptionKey)
       : null;
+
+    const { error } = await supabase
+      .from('habits')
+      .update({
+        title: encryptedTitle,
+        description: encryptedDescription,
+        category_id: categoryId || null,
+        difficulty
+      })
+      .eq('id', id);
+
+    if (!error) {
+      setHabits(habits.map((h) => 
+        h.id === id ? { ...h, title, description, category_id: categoryId || null, difficulty } : h
+      ));
+    }
+  };
+
+  const addTodo = async (title, description, categoryId, difficulty) => {
+    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+    const encryptedDescription = description
+      ? await encryption.encrypt(description, encryptionKey)
+    
+
+  const editTodo = async (title, description, categoryId, difficulty, id) => {
+    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+    const encryptedDescription = description
+      ? await encryption.encrypt(description, encryptionKey)
+      : null;
+
+    const { error } = await supabase
+      .from('todos')
+      .update({
+        title: encryptedTitle,
+        description: encryptedDescription,
+        category_id: categoryId || null,
+        difficulty
+      })
+      .eq('id', id);
+
+    if (!error) {
+      setTodos(todos.map((t) => 
+        t.id === id ? { ...t, title, description, category_id: categoryId || null, difficulty } : t
+      ));
+    }
+  };  : null;
 
     const { data, error } = await supabase
       .from('todos')
@@ -210,22 +270,25 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
           <a
             className={`nav-link ${page === 'calendar' ? 'active' : ''}`}
             onClick={() => setPage('calendar')}
-          >
-            Calendar
-          </a>
-          <a
-            className={`nav-link ${page === 'stats' ? 'active' : ''}`}
-            onClick={() => setPage('stats')}
-          >
-            Stats
-          </a>
-          <button className="theme-toggle" onClick={toggleTheme}>
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-          <a className="nav-link" onClick={onLogout}>
-            Logout
-          </a>
-        </nav>
+          onEdit={editCategory}
+        />
+      )}
+      {page === 'habits' && (
+        <HabitsPage
+          habits={habits}
+          categories={categories}
+          onAdd={addHabit}
+          onDelete={deleteHabit}
+          onEdit={editHabit}
+        />
+      )}
+      {page === 'todos' && (
+        <TodosPage
+          todos={todos}
+          categories={categories}
+          onAdd={addTodo}
+          onDelete={deleteTodo}
+          onEdit={edit
       </header>
 
       {page === 'categories' && (
