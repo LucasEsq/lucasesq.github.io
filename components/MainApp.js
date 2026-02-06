@@ -157,30 +157,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
     const encryptedTitle = await encryption.encrypt(title, encryptionKey);
     const encryptedDescription = description
       ? await encryption.encrypt(description, encryptionKey)
-    
-
-  const editTodo = async (title, description, categoryId, difficulty, id) => {
-    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
-    const encryptedDescription = description
-      ? await encryption.encrypt(description, encryptionKey)
       : null;
-
-    const { error } = await supabase
-      .from('todos')
-      .update({
-        title: encryptedTitle,
-        description: encryptedDescription,
-        category_id: categoryId || null,
-        difficulty
-      })
-      .eq('id', id);
-
-    if (!error) {
-      setTodos(todos.map((t) => 
-        t.id === id ? { ...t, title, description, category_id: categoryId || null, difficulty } : t
-      ));
-    }
-  };  : null;
 
     const { data, error } = await supabase
       .from('todos')
@@ -203,6 +180,29 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   const deleteTodo = async (id) => {
     await supabase.from('todos').delete().eq('id', id);
     setTodos(todos.filter((t) => t.id !== id));
+  };
+
+  const editTodo = async (title, description, categoryId, difficulty, id) => {
+    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+    const encryptedDescription = description
+      ? await encryption.encrypt(description, encryptionKey)
+      : null;
+
+    const { error } = await supabase
+      .from('todos')
+      .update({
+        title: encryptedTitle,
+        description: encryptedDescription,
+        category_id: categoryId || null,
+        difficulty
+      })
+      .eq('id', id);
+
+    if (!error) {
+      setTodos(todos.map((t) => 
+        t.id === id ? { ...t, title, description, category_id: categoryId || null, difficulty } : t
+      ));
+    }
   };
 
   const toggleCompletion = async (itemId, itemType, date) => {
