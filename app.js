@@ -983,7 +983,7 @@ function TodoModal({ categories, onClose, onSave }) {
 // ============================================
 // CALENDAR PAGE
 // ============================================
-function CalendarPage({ habits, todos, completions, onToggle }) {    function CalendarPage({ habits, todos, completions, onToggle }) {
+function CalendarPage({ habits, todos, completions, onToggle }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
