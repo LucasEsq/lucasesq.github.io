@@ -270,6 +270,29 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
           <a
             className={`nav-link ${page === 'calendar' ? 'active' : ''}`}
             onClick={() => setPage('calendar')}
+          >
+            Calendar
+          </a>
+          <a
+            className={`nav-link ${page === 'stats' ? 'active' : ''}`}
+            onClick={() => setPage('stats')}
+          >
+            Stats
+          </a>
+          <button className="theme-toggle" onClick={toggleTheme}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+          <a className="nav-link" onClick={onLogout}>
+            Logout
+          </a>
+        </nav>
+      </header>
+
+      {page === 'categories' && (
+        <CategoriesPage
+          categories={categories}
+          onAdd={addCategory}
+          onDelete={deleteCategory}
           onEdit={editCategory}
         />
       )}
@@ -288,30 +311,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
           categories={categories}
           onAdd={addTodo}
           onDelete={deleteTodo}
-          onEdit={edit
-      </header>
-
-      {page === 'categories' && (
-        <CategoriesPage
-          categories={categories}
-          onAdd={addCategory}
-          onDelete={deleteCategory}
-        />
-      )}
-      {page === 'habits' && (
-        <HabitsPage
-          habits={habits}
-          categories={categories}
-          onAdd={addHabit}
-          onDelete={deleteHabit}
-        />
-      )}
-      {page === 'todos' && (
-        <TodosPage
-          todos={todos}
-          categories={categories}
-          onAdd={addTodo}
-          onDelete={deleteTodo}
+          onEdit={editTodo}
         />
       )}
       {page === 'calendar' && (

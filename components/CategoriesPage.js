@@ -124,7 +124,8 @@ function CategoriesPage({ categories, onAdd, onDelete, onEdit }) {
                   style={{ backgroundColor: category.color }}
                 />
                 <span className="category-name">{category.name}</span>
-                <buttonicon-btn"
+                <button
+                  className="icon-btn"
                   onClick={() => {
                     setEditingCategory(category);
                     setShowModal(true);
@@ -135,8 +136,19 @@ function CategoriesPage({ categories, onAdd, onDelete, onEdit }) {
                   ✏
                 </button>
                 <button
-                  className="
-                  className="delete-category"{
+                  className="delete-category"
+                  onClick={() => onDelete(category.id)}
+                  title="Delete category"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button className="add-btn" onClick={() => {
         setEditingCategory(null);
         setShowModal(true);
       }}>
@@ -149,19 +161,7 @@ function CategoriesPage({ categories, onAdd, onDelete, onEdit }) {
             setEditingCategory(null);
           }}
           onSave={editingCategory ? onEdit : onAdd}
-          editingCategory={editingCategory
-            ))}
-          </div>
-        )}
-      </div>
-
-      <button className="add-btn" onClick={() => setShowModal(true)}>
-        +
-      </button>
-      {showModal && (
-        <CategoryModal
-          onClose={() => setShowModal(false)}
-          onSave={onAdd}
+          editingCategory={editingCategory}
         />
       )}
     </>
