@@ -40,12 +40,23 @@ Once your project is ready:
 3. Paste this SQL code:
 
 ```sql
+-- Create categories table
+CREATE TABLE categories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users NOT NULL,
+  name TEXT NOT NULL,
+  color TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create habits table
 CREATE TABLE habits (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
+  category_id UUID REFERENCES categories,
   title TEXT NOT NULL,
   description TEXT,
+  difficulty INTEGER CHECK (difficulty >= 1 AND difficulty <= 5),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -53,8 +64,10 @@ CREATE TABLE habits (
 CREATE TABLE todos (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
+  category_id UUID REFERENCES categories,
   title TEXT NOT NULL,
   description TEXT,
+  difficulty INTEGER CHECK (difficulty >= 1 AND difficulty <= 5),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -70,11 +83,28 @@ CREATE TABLE completions (
 );
 
 -- Enable Row Level Security
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE completions ENABLE ROW LEVEL SECURITY;
 
 -- Create policies so users can only see their own data
+CREATE POLICY "Users can view their own categories"
+  ON categories FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own categories"
+  ON categories FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own categories"
+  ON categories FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own categories"
+  ON categories FOR DELETE
+  USING (auth.uid() = user_id);
+
 CREATE POLICY "Users can view their own habits"
   ON habits FOR SELECT
   USING (auth.uid() = user_id);
@@ -82,6 +112,10 @@ CREATE POLICY "Users can view their own habits"
 CREATE POLICY "Users can insert their own habits"
   ON habits FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own habits"
+  ON habits FOR UPDATE
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete their own habits"
   ON habits FOR DELETE
@@ -94,6 +128,10 @@ CREATE POLICY "Users can view their own todos"
 CREATE POLICY "Users can insert their own todos"
   ON todos FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own todos"
+  ON todos FOR UPDATE
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete their own todos"
   ON todos FOR DELETE
