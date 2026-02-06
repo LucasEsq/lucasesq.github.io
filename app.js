@@ -1,11 +1,3 @@
-console.log("app.js loaded", {
-  react: React?.version,
-  reactDOM: !!ReactDOM,
-  supabase: !!window.supabase,
-  secure: window.isSecureContext,
-  subtle: !!crypto?.subtle
-});
-
 const { useState, useEffect } = React;
 
 // ============================================
