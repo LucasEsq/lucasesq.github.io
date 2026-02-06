@@ -554,4 +554,421 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   );
 }
 
+// ============================================
+// CATEGORIES PAGE
+// ============================================
+function CategoriesPage({ categories, onAdd, onDelete }) {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <>
+      <h2>Categories</h2>
+      <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>
+        Organize your habits and todos into categories
+      </p>
+
+      <div className="categories-section">
+        <h3>Your Categories</h3>
+        {categories.length === 0 ? (
+          <p style={{ color: 'var(--muted)', marginTop: '1rem' }}>
+            No categories yet. Click the + button to create your first category.
+          </p>
+        ) : (
+          <div className="categories-list">
+            {categories.map((category) => (
+              <div key={category.id} className="category-chip">
+                <div
+                  className="category-color"
+                  style={{ backgroundColor: category.color }}
+                />
+                <span className="category-name">{category.name}</span>
+                <button
+                  className="delete-category"
+                  onClick={() => onDelete(category.id)}
+                  title="Delete category"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button className="add-btn" onClick={() => setShowModal(true)}>
+        +
+      </button>
+      {showModal && (
+        <CategoryModal
+          onClose={() => setShowModal(false)}
+          onSave={onAdd}
+        />
+      )}
+    </>
+  );
+}
+
+function CategoryModal({ onClose, onSave }) {
+  const [name, setName] = useState('');
+  const [color, setColor] = useState('#8b5a3c');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(name, color);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>New Category</h2>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Name *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+              placeholder="e.g., Work, Health, Personal"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Color</label>
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+            />
+          </div>
+
+          <div className="btn-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn">
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// HABITS PAGE
+// ============================================
+function HabitsPage({ habits, categories, onAdd, onDelete }) {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <>
+      <div className="items-grid">
+        {habits.length === 0 && (
+          <div className="empty-state">
+            No habits yet. Click the + button to create your first habit.
+          </div>
+        )}
+
+        {habits.map((habit) => {
+          const category = categories.find((c) => c.id === habit.category_id);
+
+          return (
+            <div key={habit.id} className="item-card">
+              <div className="item-info">
+                <h3>{habit.title}</h3>
+
+                <div className="item-meta">
+                  {category && (
+                    <span
+                      className="category-badge"
+                      style={{
+                        backgroundColor: category.color + '20',
+                        color: category.color,
+                        border: `1px solid ${category.color}`
+                      }}
+                    >
+                      {category.name}
+                    </span>
+                  )}
+                  {habit.difficulty && <Stars count={habit.difficulty} />}
+                </div>
+
+                {habit.description && (
+                  <p className="item-description">{habit.description}</p>
+                )}
+              </div>
+
+              <div className="item-actions">
+                <button
+                  className="icon-btn"
+                  onClick={() => onDelete(habit.id)}
+                  title="Delete"
+                >
+                  🗑
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button className="add-btn" onClick={() => setShowModal(true)}>
+        +
+      </button>
+      {showModal && (
+        <HabitModal
+          categories={categories}
+          onClose={() => setShowModal(false)}
+          onSave={onAdd}
+        />
+      )}
+    </>
+  );
+}
+
+function HabitModal({ categories, onClose, onSave }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [difficulty, setDifficulty] = useState(3);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(title, description, categoryId || null, difficulty);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>New Habit</h2>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Title *</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Category</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">No category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Difficulty (1-5 stars)</label>
+            <StarSelector value={difficulty} onChange={setDifficulty} />
+          </div>
+
+          <div className="form-group">
+            <label>Description (optional)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="btn-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn">
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// TODOS PAGE
+// ============================================
+function TodosPage({ todos, categories, onAdd, onDelete }) {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <>
+      <div className="items-grid">
+        {todos.length === 0 && (
+          <div className="empty-state">
+            No todos yet. Click the + button to create your first todo.
+          </div>
+        )}
+
+        {todos.map((todo) => {
+          const category = categories.find((c) => c.id === todo.category_id);
+
+          return (
+            <div key={todo.id} className="item-card">
+              <div className="item-info">
+                <h3>{todo.title}</h3>
+
+                <div className="item-meta">
+                  {category && (
+                    <span
+                      className="category-badge"
+                      style={{
+                        backgroundColor: category.color + '20',
+                        color: category.color,
+                        border: `1px solid ${category.color}`
+                      }}
+                    >
+                      {category.name}
+                    </span>
+                  )}
+                  {todo.difficulty && <Stars count={todo.difficulty} />}
+                </div>
+
+                {todo.description && (
+                  <p className="item-description">{todo.description}</p>
+                )}
+              </div>
+
+              <div className="item-actions">
+                <button
+                  className="icon-btn"
+                  onClick={() => onDelete(todo.id)}
+                  title="Delete"
+                >
+                  🗑
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button className="add-btn" onClick={() => setShowModal(true)}>
+        +
+      </button>
+      {showModal && (
+        <TodoModal
+          categories={categories}
+          onClose={() => setShowModal(false)}
+          onSave={onAdd}
+        />
+      )}
+    </>
+  );
+}
+
+function TodoModal({ categories, onClose, onSave }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [difficulty, setDifficulty] = useState(3);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(title, description, categoryId || null, difficulty);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>New Todo</h2>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Title *</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Category</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">No category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Difficulty (1-5 stars)</label>
+            <StarSelector value={difficulty} onChange={setDifficulty} />
+          </div>
+
+          <div className="form-group">
+            <label>Description (optional)</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="btn-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn">
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
