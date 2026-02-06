@@ -1,3 +1,11 @@
+console.log("app.js loaded", {
+  react: React?.version,
+  reactDOM: !!ReactDOM,
+  supabase: !!window.supabase,
+  secure: window.isSecureContext,
+  subtle: !!crypto?.subtle
+});
+
 const { useState, useEffect } = React;
 
 // ============================================
@@ -972,5 +980,15 @@ function TodoModal({ categories, onClose, onSave }) {
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+try {
+  const rootEl = document.getElementById("root");
+  const root = ReactDOM.createRoot(rootEl);
+  root.render(<App />);
+} catch (e) {
+  console.error("Fatal render error:", e);
+  document.getElementById("root").innerHTML =
+    "<pre style='padding:16px;white-space:pre-wrap;color:red'>"
+    + e.stack
+    + "</pre>";
+}
+
