@@ -264,6 +264,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
           habits={habits}
           todos={todos}
           completions={completions}
+          categories={categories}
         />
       )}
     </div>
