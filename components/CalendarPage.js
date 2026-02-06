@@ -13,10 +13,16 @@ function DayView({ date, habits, todos, completions, onToggle }) {
     );
   };
 
-  // Filter todos to only show those with a completion record on this date
-  const todosForDay = todos.filter(todo => 
-    completions.some(c => c.item_id === todo.id && c.item_type === 'todo' && c.date === dateStr)
-  );
+  // Filter todos: show uncompleted todos on all days, or todos completed on this date
+  const todosForDay = todos.filter(todo => {
+    const isCompletedAnyDay = completions.some(c => c.item_id === todo.id && c.item_type === 'todo');
+    if (!isCompletedAnyDay) {
+      // Not completed yet, show on all days
+      return true;
+    }
+    // Completed on some day, only show on that day
+    return completions.some(c => c.item_id === todo.id && c.item_type === 'todo' && c.date === dateStr);
+  });
 
   return (
     <div className="day-view">
