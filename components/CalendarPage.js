@@ -13,6 +13,11 @@ function DayView({ date, habits, todos, completions, onToggle }) {
     );
   };
 
+  // Filter todos to only show those with a completion record on this date
+  const todosForDay = todos.filter(todo => 
+    completions.some(c => c.item_id === todo.id && c.item_type === 'todo' && c.date === dateStr)
+  );
+
   return (
     <div className="day-view">
       <div className="day-view-header">
@@ -43,12 +48,12 @@ function DayView({ date, habits, todos, completions, onToggle }) {
         </>
       )}
 
-      {todos.length > 0 && (
+      {todosForDay.length > 0 && (
         <>
           <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem', fontSize: '1.1rem', color: 'var(--muted)' }}>
             Todos
           </h3>
-          {todos.map(todo => (
+          {todosForDay.map(todo => (
             <div key={todo.id} className="toggle-item">
               <div>
                 <div style={{ fontWeight: '500' }}>{todo.title}</div>
@@ -67,7 +72,7 @@ function DayView({ date, habits, todos, completions, onToggle }) {
         </>
       )}
 
-      {habits.length === 0 && todos.length === 0 && (
+      {habits.length === 0 && todosForDay.length === 0 && (
         <div className="empty-state">
           Create some habits or todos to track them here.
         </div>
@@ -162,8 +167,11 @@ function CalendarPage({ habits, todos, completions, onToggle }) {
           <div key={day} className="calendar-header">{day}</div>
         ))}
         {days.map((day, idx) => {
-          const completed = getCompletedCount(day.date);
-          const total = habits.length + todos.length;
+          const dateStr = day.date.toISOString().split('T')[0];
+          const habitCompletions = completions.filter(c => 
+            c.item_type === 'habit' && c.date === dateStr
+          ).length;
+          const totalHabits = habits.length;
           return (
             <div
               key={idx}
@@ -171,8 +179,8 @@ function CalendarPage({ habits, todos, completions, onToggle }) {
               onClick={() => setSelectedDate(day.date)}
             >
               <div className="day-number">{day.date.getDate()}</div>
-              {completed > 0 && (
-                <div className="day-indicator">{completed}/{total}</div>
+              {habitCompletions > 0 && (
+                <div className="day-indicator">{habitCompletions}/{totalHabits}</div>
               )}
             </div>
           );
