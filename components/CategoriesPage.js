@@ -1,0 +1,150 @@
+function CategoryModal({ onClose, onSave }) {
+  const [name, setName] = useState('');
+  const [color, setColor] = useState('#8b5a3c');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(name, color);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>New Category</h2>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Name *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+              placeholder="e.g., Work, Health, Personal"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Color</label>
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+            />
+          </div>
+
+          <div className="btn-group">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn">
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Alternative using the reusable FormModal component
+function CategoryModalReusable({ onClose, onSave }) {
+  const [name, setName] = useState('');
+  const [color, setColor] = useState('#8b5a3c');
+
+  const handleSubmit = () => {
+    onSave(name, color);
+  };
+
+  return (
+    <FormModal
+      title="New Category"
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      submitText="Create"
+    >
+      <div className="form-group">
+        <label>Name *</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          autoFocus
+          placeholder="e.g., Work, Health, Personal"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Color</label>
+        <input
+          type="color"
+          value={color}
+          onChange={(e) => setColor(e.target.value)}
+        />
+      </div>
+    </FormModal>
+  );
+}
+
+function CategoriesPage({ categories, onAdd, onDelete }) {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <>
+      <h2>Categories</h2>
+      <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>
+        Organize your habits and todos into categories
+      </p>
+
+      <div className="categories-section">
+        <h3>Your Categories</h3>
+        {categories.length === 0 ? (
+          <p style={{ color: 'var(--muted)', marginTop: '1rem' }}>
+            No categories yet. Click the + button to create your first category.
+          </p>
+        ) : (
+          <div className="categories-list">
+            {categories.map((category) => (
+              <div key={category.id} className="category-chip">
+                <div
+                  className="category-color"
+                  style={{ backgroundColor: category.color }}
+                />
+                <span className="category-name">{category.name}</span>
+                <button
+                  className="delete-category"
+                  onClick={() => onDelete(category.id)}
+                  title="Delete category"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button className="add-btn" onClick={() => setShowModal(true)}>
+        +
+      </button>
+      {showModal && (
+        <CategoryModal
+          onClose={() => setShowModal(false)}
+          onSave={onAdd}
+        />
+      )}
+    </>
+  );
+}
