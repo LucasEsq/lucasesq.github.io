@@ -60,6 +60,13 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
   const handleLogin = async (password) => {
     // Store encryption key in state
     setEncryptionKey(password);
