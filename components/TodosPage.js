@@ -3,13 +3,36 @@ function TodoModal({ categories, onClose, onSave, editingTodo = null }) {
   const [description, setDescription] = useState(editingTodo?.description || '');
   const [categoryId, setCategoryId] = useState(editingTodo?.category_id || '');
   const [difficulty, setDifficulty] = useState(editingTodo?.difficulty || 3);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    setError(null);
+    if (!title.trim()) {
+      setError('Title is required');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const success = await onSave(title, description, categoryId || null, difficulty, editingTodo?.id);
+      if (success !== false) {
+        onClose();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to save todo');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <FormModal
       title={editingTodo ? 'Edit Todo' : 'New Todo'}
       onClose={onClose}
-      onSubmit={() => onSave(title, description, categoryId || null, difficulty, editingTodo?.id)}
+      onSubmit={handleSave}
       submitText={editingTodo ? 'Save' : 'Create'}
+      error={error}
     >
       <div className="form-group">
         <label>Title *</label>
@@ -19,6 +42,7 @@ function TodoModal({ categories, onClose, onSave, editingTodo = null }) {
           onChange={(e) => setTitle(e.target.value)}
           required
           autoFocus
+          disabled={loading}
         />
       </div>
 
@@ -27,6 +51,7 @@ function TodoModal({ categories, onClose, onSave, editingTodo = null }) {
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
+          disabled={loading}
         >
           <option value="">No category</option>
           {categories.map((cat) => (
@@ -39,7 +64,7 @@ function TodoModal({ categories, onClose, onSave, editingTodo = null }) {
 
       <div className="form-group">
         <label>Difficulty (1-5 stars)</label>
-        <StarSelector value={difficulty} onChange={setDifficulty} />
+        <StarSelector value={difficulty} onChange={setDifficulty} disabled={loading} />
       </div>
 
       <div className="form-group">
@@ -47,6 +72,7 @@ function TodoModal({ categories, onClose, onSave, editingTodo = null }) {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          disabled={loading}
         />
       </div>
     </FormModal>

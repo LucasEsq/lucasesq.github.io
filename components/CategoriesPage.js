@@ -1,11 +1,27 @@
 function CategoryModal({ onClose, onSave, editingCategory = null }) {
   const [name, setName] = useState(editingCategory?.name || '');
   const [color, setColor] = useState(editingCategory?.color || '#8b5a3c');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(name, color, editingCategory?.id);
-    onClose();
+  const handleSave = async () => {
+    setError(null);
+    if (!name.trim()) {
+      setError('Category name is required');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const success = await onSave(name, color, editingCategory?.id);
+      if (success !== false) {
+        onClose();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to save category');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -18,7 +34,19 @@ function CategoryModal({ onClose, onSave, editingCategory = null }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+          {error && (
+            <div className="error-message" style={{ 
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              backgroundColor: '#fee',
+              color: '#c00',
+              borderRadius: '4px',
+              fontSize: '0.9rem'
+            }}>
+              {error}
+            </div>
+          )}
           <div className="form-group">
             <label>Name *</label>
             <input
@@ -28,6 +56,7 @@ function CategoryModal({ onClose, onSave, editingCategory = null }) {
               required
               autoFocus
               placeholder="e.g., Work, Health, Personal"
+              disabled={loading}
             />
           </div>
 
@@ -37,6 +66,7 @@ function CategoryModal({ onClose, onSave, editingCategory = null }) {
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -45,10 +75,11 @@ function CategoryModal({ onClose, onSave, editingCategory = null }) {
               type="button"
               className="btn btn-secondary"
               onClick={onClose}
+              disabled={loading}
             >
               Cancel
             </button>
-            <button type="submit" className="btn">
+            <button type="submit" className="btn" disabled={loading}>
               {editingCategory ? 'Save' : 'Create'}
             </button>
           </div>

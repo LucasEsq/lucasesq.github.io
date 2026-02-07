@@ -71,14 +71,24 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   };
 
   const addCategory = async (name, color) => {
-    const encryptedName = await encryption.encrypt(name, encryptionKey);
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([{ user_id: user.id, name: encryptedName, color }])
-      .select();
+    try {
+      const encryptedName = await encryption.encrypt(name, encryptionKey);
+      const { data, error } = await supabase
+        .from('categories')
+        .insert([{ user_id: user.id, name: encryptedName, color }])
+        .select();
 
-    if (!error && data) {
+      if (error) {
+        throw new Error(error.message || 'Failed to create category');
+      }
+      if (!data) {
+        throw new Error('Failed to create category');
+      }
+      
       setCategories([...categories, { ...data[0], name }]);
+      return true;
+    } catch (err) {
+      throw err;
     }
   };
 
@@ -88,40 +98,57 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   };
 
   const editCategory = async (name, color, id) => {
-    const encryptedName = await encryption.encrypt(name, encryptionKey);
-    const { error } = await supabase
-      .from('categories')
-      .update({ name: encryptedName, color })
-      .eq('id', id);
+    try {
+      const encryptedName = await encryption.encrypt(name, encryptionKey);
+      const { error } = await supabase
+        .from('categories')
+        .update({ name: encryptedName, color })
+        .eq('id', id);
 
-    if (!error) {
+      if (error) {
+        throw new Error(error.message || 'Failed to update category');
+      }
+
       setCategories(categories.map((c) => 
         c.id === id ? { ...c, name, color } : c
       ));
+      return true;
+    } catch (err) {
+      throw err;
     }
   };
 
   const addHabit = async (title, description, categoryId, difficulty) => {
-    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
-    const encryptedDescription = description
-      ? await encryption.encrypt(description, encryptionKey)
-      : null;
+    try {
+      const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+      const encryptedDescription = description
+        ? await encryption.encrypt(description, encryptionKey)
+        : null;
 
-    const { data, error } = await supabase
-      .from('habits')
-      .insert([
-        {
-          user_id: user.id,
-          title: encryptedTitle,
-          description: encryptedDescription,
-          category_id: categoryId || null,
-          difficulty
-        }
-      ])
-      .select();
+      const { data, error } = await supabase
+        .from('habits')
+        .insert([
+          {
+            user_id: user.id,
+            title: encryptedTitle,
+            description: encryptedDescription,
+            category_id: categoryId || null,
+            difficulty
+          }
+        ])
+        .select();
 
-    if (!error && data) {
+      if (error) {
+        throw new Error(error.message || 'Failed to create habit');
+      }
+      if (!data) {
+        throw new Error('Failed to create habit');
+      }
+      
       setHabits([...habits, { ...data[0], title, description }]);
+      return true;
+    } catch (err) {
+      throw err;
     }
   };
 
@@ -131,49 +158,66 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   };
 
   const editHabit = async (title, description, categoryId, difficulty, id) => {
-    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
-    const encryptedDescription = description
-      ? await encryption.encrypt(description, encryptionKey)
-      : null;
+    try {
+      const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+      const encryptedDescription = description
+        ? await encryption.encrypt(description, encryptionKey)
+        : null;
 
-    const { error } = await supabase
-      .from('habits')
-      .update({
-        title: encryptedTitle,
-        description: encryptedDescription,
-        category_id: categoryId || null,
-        difficulty
-      })
-      .eq('id', id);
-
-    if (!error) {
-      setHabits(habits.map((h) => 
-        h.id === id ? { ...h, title, description, category_id: categoryId || null, difficulty } : h
-      ));
-    }
-  };
-
-  const addTodo = async (title, description, categoryId, difficulty) => {
-    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
-    const encryptedDescription = description
-      ? await encryption.encrypt(description, encryptionKey)
-      : null;
-
-    const { data, error } = await supabase
-      .from('todos')
-      .insert([
-        {
-          user_id: user.id,
+      const { error } = await supabase
+        .from('habits')
+        .update({
           title: encryptedTitle,
           description: encryptedDescription,
           category_id: categoryId || null,
           difficulty
-        }
-      ])
-      .select();
+        })
+        .eq('id', id);
 
-    if (!error && data) {
+      if (error) {
+        throw new Error(error.message || 'Failed to update habit');
+      }
+
+      setHabits(habits.map((h) => 
+        h.id === id ? { ...h, title, description, category_id: categoryId || null, difficulty } : h
+      ));
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const addTodo = async (title, description, categoryId, difficulty) => {
+    try {
+      const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+      const encryptedDescription = description
+        ? await encryption.encrypt(description, encryptionKey)
+        : null;
+
+      const { data, error } = await supabase
+        .from('todos')
+        .insert([
+          {
+            user_id: user.id,
+            title: encryptedTitle,
+            description: encryptedDescription,
+            category_id: categoryId || null,
+            difficulty
+          }
+        ])
+        .select();
+
+      if (error) {
+        throw new Error(error.message || 'Failed to create todo');
+      }
+      if (!data) {
+        throw new Error('Failed to create todo');
+      }
+      
       setTodos([...todos, { ...data[0], title, description }]);
+      return true;
+    } catch (err) {
+      throw err;
     }
   };
 
@@ -183,25 +227,32 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   };
 
   const editTodo = async (title, description, categoryId, difficulty, id) => {
-    const encryptedTitle = await encryption.encrypt(title, encryptionKey);
-    const encryptedDescription = description
-      ? await encryption.encrypt(description, encryptionKey)
-      : null;
+    try {
+      const encryptedTitle = await encryption.encrypt(title, encryptionKey);
+      const encryptedDescription = description
+        ? await encryption.encrypt(description, encryptionKey)
+        : null;
 
-    const { error } = await supabase
-      .from('todos')
-      .update({
-        title: encryptedTitle,
-        description: encryptedDescription,
-        category_id: categoryId || null,
-        difficulty
-      })
-      .eq('id', id);
+      const { error } = await supabase
+        .from('todos')
+        .update({
+          title: encryptedTitle,
+          description: encryptedDescription,
+          category_id: categoryId || null,
+          difficulty
+        })
+        .eq('id', id);
 
-    if (!error) {
+      if (error) {
+        throw new Error(error.message || 'Failed to update todo');
+      }
+
       setTodos(todos.map((t) => 
         t.id === id ? { ...t, title, description, category_id: categoryId || null, difficulty } : t
       ));
+      return true;
+    } catch (err) {
+      throw err;
     }
   };
 

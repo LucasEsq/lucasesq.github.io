@@ -3,19 +3,36 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
   const [description, setDescription] = useState(editingHabit?.description || '');
   const [categoryId, setCategoryId] = useState(editingHabit?.category_id || '');
   const [difficulty, setDifficulty] = useState(editingHabit?.difficulty || 3);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(title, description, categoryId || null, difficulty, editingHabit?.id);
-    onClose();
+  const handleSave = async () => {
+    setError(null);
+    if (!title.trim()) {
+      setError('Title is required');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const success = await onSave(title, description, categoryId || null, difficulty, editingHabit?.id);
+      if (success !== false) {
+        onClose();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to save habit');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <FormModal
       title={editingHabit ? 'Edit Habit' : 'New Habit'}
       onClose={onClose}
-      onSubmit={() => onSave(title, description, categoryId || null, difficulty, editingHabit?.id)}
+      onSubmit={handleSave}
       submitText={editingHabit ? 'Save' : 'Create'}
+      error={error}
     >
       <div className="form-group">
         <label>Title *</label>
@@ -25,6 +42,7 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
           onChange={(e) => setTitle(e.target.value)}
           required
           autoFocus
+          disabled={loading}
         />
       </div>
 
@@ -33,6 +51,7 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
+          disabled={loading}
         >
           <option value="">No category</option>
           {categories.map((cat) => (
@@ -45,7 +64,7 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
 
       <div className="form-group">
         <label>Difficulty (1-5 stars)</label>
-        <StarSelector value={difficulty} onChange={setDifficulty} />
+        <StarSelector value={difficulty} onChange={setDifficulty} disabled={loading} />
       </div>
 
       <div className="form-group">
@@ -53,6 +72,7 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          disabled={loading}
         />
       </div>
     </FormModal>

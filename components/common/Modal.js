@@ -15,7 +15,7 @@ function Modal({ title, onClose, children }) {
 }
 
 // Reusable form modal component
-function FormModal({ title, onClose, onSubmit, children, submitText = "Save" }) {
+function FormModal({ title, onClose, onSubmit, children, submitText = "Save", error = null }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit();
@@ -31,6 +31,18 @@ function FormModal({ title, onClose, onSubmit, children, submitText = "Save" }) 
           </button>
         </div>
         <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="error-message" style={{ 
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              backgroundColor: '#fee',
+              color: '#c00',
+              borderRadius: '4px',
+              fontSize: '0.9rem'
+            }}>
+              {error}
+            </div>
+          )}
           {children}
           <div className="btn-group">
             <button
