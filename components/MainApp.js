@@ -319,6 +319,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
         <CalendarPage
           habits={habits}
           todos={todos}
+          categories={categories}
           completions={completions}
           onToggle={toggleCompletion}
         />

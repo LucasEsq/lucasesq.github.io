@@ -1,4 +1,4 @@
-function DayView({ date, habits, todos, completions, onToggle }) {
+function DayView({ date, habits, todos, categories, completions, onToggle, filterHabitCategory, filterTodoCategory, filterTodoStatus }) {
   const dateStr = date.toISOString().split('T')[0];
   const dateDisplay = date.toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -13,16 +13,72 @@ function DayView({ date, habits, todos, completions, onToggle }) {
     );
   };
 
+  const isTodoCompletedAnyDay = (todoId) => {
+    return completions.some(c => c.item_id === todoId && c.item_type === 'todo');
+  };
+
+  // Filter and display habits for this day
+  const habitsForDay = habits.filter(habit => {
+    if (filterHabitCategory && habit.category_id !== filterHabitCategory) {
+      return false;
+    }
+    return true;
+  });
+
   // Filter todos: show uncompleted todos on all days, or todos completed on this date
   const todosForDay = todos.filter(todo => {
-    const isCompletedAnyDay = completions.some(c => c.item_id === todo.id && c.item_type === 'todo');
+    if (filterTodoCategory && todo.category_id !== filterTodoCategory) {
+      return false;
+    }
+
+    if (filterTodoStatus === 'done' && !isCompleted(todo.id, 'todo')) {
+      return false;
+    }
+    if (filterTodoStatus === 'not-done' && isCompleted(todo.id, 'todo')) {
+      return false;
+    }
+
+    const isCompletedAnyDay = isTodoCompletedAnyDay(todo.id);
     if (!isCompletedAnyDay) {
-      // Not completed yet, show on all days
       return true;
     }
-    // Completed on some day, only show on that day
-    return completions.some(c => c.item_id === todo.id && c.item_type === 'todo' && c.date === dateStr);
+    return isCompleted(todo.id, 'todo');
   });
+
+  const renderItemWithMeta = (item, itemType) => {
+    const category = categories.find((c) => c.id === item.category_id);
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+        <div style={{ fontWeight: '500' }}>{item.title}</div>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          {category && (
+            <span
+              style={{
+                padding: '0.2rem 0.5rem',
+                borderRadius: '0.25rem',
+                fontSize: '0.75rem',
+                backgroundColor: category.color + '20',
+                color: category.color,
+                border: `1px solid ${category.color}`
+              }}
+            >
+              {category.name}
+            </span>
+          )}
+          {item.difficulty && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+              {'★'.repeat(item.difficulty)}
+            </div>
+          )}
+        </div>
+        {item.description && (
+          <div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+            {item.description}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="day-view">
@@ -30,21 +86,14 @@ function DayView({ date, habits, todos, completions, onToggle }) {
         <h3>{dateDisplay}</h3>
       </div>
 
-      {habits.length > 0 && (
+      {habitsForDay.length > 0 && (
         <>
           <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem', fontSize: '1.1rem', color: 'var(--muted)' }}>
             Habits
           </h3>
-          {habits.map(habit => (
+          {habitsForDay.map(habit => (
             <div key={habit.id} className="toggle-item">
-              <div>
-                <div style={{ fontWeight: '500' }}>{habit.title}</div>
-                {habit.description && (
-                  <div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
-                    {habit.description}
-                  </div>
-                )}
-              </div>
+              {renderItemWithMeta(habit, 'habit')}
               <div 
                 className={`checkbox ${isCompleted(habit.id, 'habit') ? 'checked' : ''}`}
                 onClick={() => onToggle(habit.id, 'habit', date)}
@@ -61,14 +110,7 @@ function DayView({ date, habits, todos, completions, onToggle }) {
           </h3>
           {todosForDay.map(todo => (
             <div key={todo.id} className="toggle-item">
-              <div>
-                <div style={{ fontWeight: '500' }}>{todo.title}</div>
-                {todo.description && (
-                  <div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
-                    {todo.description}
-                  </div>
-                )}
-              </div>
+              {renderItemWithMeta(todo, 'todo')}
               <div 
                 className={`checkbox ${isCompleted(todo.id, 'todo') ? 'checked' : ''}`}
                 onClick={() => onToggle(todo.id, 'todo', date)}
@@ -78,18 +120,23 @@ function DayView({ date, habits, todos, completions, onToggle }) {
         </>
       )}
 
-      {habits.length === 0 && todosForDay.length === 0 && (
+      {habitsForDay.length === 0 && todosForDay.length === 0 && (
         <div className="empty-state">
-          Create some habits or todos to track them here.
+          {habits.length === 0 && todos.length === 0 
+            ? 'Create some habits or todos to track them here.'
+            : 'No items match the selected filters.'}
         </div>
       )}
     </div>
   );
 }
 
-function CalendarPage({ habits, todos, completions, onToggle }) {
+function CalendarPage({ habits, todos, categories, completions, onToggle }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [filterHabitCategory, setFilterHabitCategory] = useState('');
+  const [filterTodoCategory, setFilterTodoCategory] = useState('');
+  const [filterTodoStatus, setFilterTodoStatus] = useState('all');
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -193,12 +240,63 @@ function CalendarPage({ habits, todos, completions, onToggle }) {
         })}
       </div>
 
+      <div className="filter-controls" style={{ marginBottom: '1.5rem', marginTop: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div>
+          <label style={{ marginRight: '0.5rem' }}>Habit category:</label>
+          <select
+            value={filterHabitCategory}
+            onChange={(e) => setFilterHabitCategory(e.target.value)}
+            style={{ padding: '0.5rem' }}
+          >
+            <option value="">All categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label style={{ marginRight: '0.5rem' }}>Todo category:</label>
+          <select
+            value={filterTodoCategory}
+            onChange={(e) => setFilterTodoCategory(e.target.value)}
+            style={{ padding: '0.5rem' }}
+          >
+            <option value="">All categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label style={{ marginRight: '0.5rem' }}>Todo status:</label>
+          <select
+            value={filterTodoStatus}
+            onChange={(e) => setFilterTodoStatus(e.target.value)}
+            style={{ padding: '0.5rem' }}
+          >
+            <option value="all">All</option>
+            <option value="not-done">Not done</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+      </div>
+
       <DayView 
         date={selectedDate}
         habits={habits}
         todos={todos}
+        categories={categories}
         completions={completions}
         onToggle={onToggle}
+        filterHabitCategory={filterHabitCategory}
+        filterTodoCategory={filterTodoCategory}
+        filterTodoStatus={filterTodoStatus}
       />
     </>
   );
