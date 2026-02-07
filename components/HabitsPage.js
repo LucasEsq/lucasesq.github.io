@@ -62,17 +62,68 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
 function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
   const [showModal, setShowModal] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [sortDifficulty, setSortDifficulty] = useState('none'); // 'none', 'asc', 'desc'
+
+  // Filter and sort habits
+  let filteredHabits = habits.filter(habit => {
+    // Category filter
+    if (filterCategory && habit.category_id !== filterCategory) {
+      return false;
+    }
+    return true;
+  });
+
+  // Sort habits
+  if (sortDifficulty !== 'none') {
+    filteredHabits.sort((a, b) => {
+      const diffA = a.difficulty || 0;
+      const diffB = b.difficulty || 0;
+      return sortDifficulty === 'asc' ? diffA - diffB : diffB - diffA;
+    });
+  }
 
   return (
     <>
+      <div className="filter-controls" style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div>
+          <label style={{ marginRight: '0.5rem' }}>Category:</label>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            style={{ padding: '0.5rem' }}
+          >
+            <option value="">All categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label style={{ marginRight: '0.5rem' }}>Sort by difficulty:</label>
+          <select
+            value={sortDifficulty}
+            onChange={(e) => setSortDifficulty(e.target.value)}
+            style={{ padding: '0.5rem' }}
+          >
+            <option value="none">None</option>
+            <option value="asc">Increasing</option>
+            <option value="desc">Decreasing</option>
+          </select>
+        </div>
+      </div>
+
       <div className="items-grid">
-        {habits.length === 0 && (
+        {filteredHabits.length === 0 && (
           <div className="empty-state">
-            No habits yet. Click the + button to create your first habit.
+            {habits.length === 0 ? 'No habits yet. Click the + button to create your first habit.' : 'No habits match the selected filters.'}
           </div>
         )}
 
-        {habits.map((habit) => {
+        {filteredHabits.map((habit) => {
           const category = categories.find((c) => c.id === habit.category_id);
 
           return (

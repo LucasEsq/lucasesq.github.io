@@ -309,6 +309,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
         <TodosPage
           todos={todos}
           categories={categories}
+          completions={completions}
           onAdd={addTodo}
           onDelete={deleteTodo}
           onEdit={editTodo}
