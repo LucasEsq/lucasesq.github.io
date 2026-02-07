@@ -1,5 +1,6 @@
 function DayView({ date, habits, todos, categories, completions, onToggle }) {
   const [habitFilterCategory, setHabitFilterCategory] = useState('');
+  const [habitFilterStatus, setHabitFilterStatus] = useState('all');
   const [habitSortDifficulty, setHabitSortDifficulty] = useState('none');
   const [todoFilterCategory, setTodoFilterCategory] = useState('');
   const [todoFilterStatus, setTodoFilterStatus] = useState('all');
@@ -28,6 +29,14 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
     if (habitFilterCategory && habit.category_id !== habitFilterCategory) {
       return false;
     }
+
+    if (habitFilterStatus === 'done' && !isCompleted(habit.id, 'habit')) {
+      return false;
+    }
+    if (habitFilterStatus === 'not-done' && isCompleted(habit.id, 'habit')) {
+      return false;
+    }
+
     return true;
   });
 
@@ -128,6 +137,19 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
                     {cat.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ marginRight: '0.5rem', fontSize: '0.9rem' }}>Status:</label>
+              <select
+                value={habitFilterStatus}
+                onChange={(e) => setHabitFilterStatus(e.target.value)}
+                style={{ padding: '0.4rem', fontSize: '0.9rem' }}
+              >
+                <option value="all">All</option>
+                <option value="not-done">Not done</option>
+                <option value="done">Done</option>
               </select>
             </div>
 
