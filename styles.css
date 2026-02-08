@@ -711,6 +711,27 @@ textarea {
   font-size: 0.95rem;
 }
 
+.day-summary-card {
+  position: relative;
+}
+
+.day-details-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white !important;
+  transition: background 0.2s;
+}
+
+.day-details-btn:hover {
+  background: var(--accent-dark, var(--accent));
+  opacity: 0.8;
+}
+
 .progress-bar {
   height: 8px;
   background: var(--border);

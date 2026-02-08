@@ -1,6 +1,7 @@
 function StatsPage({ habits, todos, completions, categories }) {
   const [days, setDays] = useState(7);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedDayModal, setSelectedDayModal] = useState(null);
 
   const getHabitStats = (habitId, numDays) => {
     const dates = [];
@@ -73,6 +74,31 @@ function StatsPage({ habits, todos, completions, categories }) {
     });
 
     return byDayAndCategory;
+  };
+
+  const getCompletionsForDay = (date) => {
+    return completions.filter(c => c.date === date);
+  };
+
+  const getItemsCompletedOnDay = (date) => {
+    const dayCompletions = getCompletionsForDay(date);
+    const items = [];
+
+    dayCompletions.forEach(completion => {
+      const item = completion.item_type === 'habit'
+        ? habits.find(h => h.id === completion.item_id)
+        : todos.find(t => t.id === completion.item_id);
+
+      if (item) {
+        items.push({
+          ...item,
+          type: completion.item_type,
+          category: item.category_id ? categories.find(c => c.id === item.category_id) : null
+        });
+      }
+    });
+
+    return items;
   };
 
   const starsByDayAndCategory = getStarsByCategoryByDay();
@@ -182,69 +208,179 @@ function StatsPage({ habits, todos, completions, categories }) {
         })}
       </div>
 
-      <h2 style={{ marginTop: '3rem' }}>Stars by Category</h2>
+      <h2 style={{ marginTop: '3rem' }}>Daily Summary</h2>
       <div className="stats-grid">
         {sortedDates.length === 0 && (
           <div className="empty-state">No completed items with categories yet.</div>
         )}
         {sortedDates.map(date => {
           const categoryStats = starsByDayAndCategory[date];
+          const todoCount = completions.filter(c => c.item_type === 'todo' && c.date === date).length;
           
           return (
-            <div key={date} className="stat-card">
-              <div className="stat-label" style={{ marginBottom: '1rem', fontWeight: 'bold' }}>
-                {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric',
-                  year: 'numeric'
+            <div key={date} className="stat-card day-summary-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <div className="stat-label" style={{ fontWeight: 'bold', margin: 0 }}>
+                  {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </div>
+                <button
+                  className="icon-btn day-details-btn"
+                  onClick={() => setSelectedDayModal(date)}
+                  title="View completions"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1.5rem',
+                    padding: '0.25rem',
+                    color: 'var(--accent)'
+                  }}
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Stars by Category */}
+              <div style={{ marginBottom: '1rem' }}>
+                {Object.entries(categoryStats).map(([categoryId, stars]) => {
+                  const category = categories.find(c => c.id === categoryId);
+                  if (!category) return null;
+                  
+                  return (
+                    <div key={categoryId} style={{ marginBottom: '0.5rem' }}>
+                      <span
+                        className="category-badge"
+                        style={{
+                          backgroundColor: category.color + '20',
+                          color: category.color,
+                          border: `1px solid ${category.color}`,
+                          marginRight: '0.5rem'
+                        }}
+                      >
+                        {category.name}
+                      </span>
+                      <Stars count={stars} />
+                    </div>
+                  );
                 })}
               </div>
-              
-              {Object.entries(categoryStats).map(([categoryId, stars]) => {
-                const category = categories.find(c => c.id === categoryId);
-                if (!category) return null;
-                
-                return (
-                  <div key={categoryId} style={{ marginBottom: '0.5rem' }}>
-                    <span
-                      className="category-badge"
-                      style={{
-                        backgroundColor: category.color + '20',
-                        color: category.color,
-                        border: `1px solid ${category.color}`,
-                        marginRight: '0.5rem'
-                      }}
-                    >
-                      {category.name}
-                    </span>
-                    <Stars count={stars} />
-                  </div>
-                );
-              })}
+
+              {/* Todo Completions Count */}
+              {todoCount > 0 && (
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: 'var(--muted)',
+                  borderTop: '1px solid var(--border)',
+                  paddingTop: '0.75rem',
+                  marginTop: '0.75rem'
+                }}>
+                  <strong>{todoCount}</strong> todo{todoCount !== 1 ? 's' : ''} completed
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      <h2 style={{ marginTop: '3rem' }}>Todo Completions</h2>
-      <div className="stats-grid">
-        {todosByDay.length === 0 && (
-          <div className="empty-state">No completed todos yet.</div>
-        )}
-        {todosByDay.slice(0, 10).map(([date, count]) => (
-          <div key={date} className="stat-card">
-            <div className="stat-label">
-              {new Date(date + 'T00:00:00').toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </div>
-            <div className="stat-value">{count}</div>
-            <div className="stat-label">todos completed</div>
+      {/* Day Details Modal */}
+      {selectedDayModal && (
+        <Modal
+          title={new Date(selectedDayModal + 'T00:00:00').toLocaleDateString('en-US', { 
+            month: 'long', 
+            day: 'numeric',
+            year: 'numeric'
+          })}
+          onClose={() => setSelectedDayModal(null)}
+        >
+          <div style={{ padding: '1rem' }}>
+            {(() => {
+              const items = getItemsCompletedOnDay(selectedDayModal);
+              
+              if (items.length === 0) {
+                return <p style={{ color: 'var(--muted)' }}>No completions recorded for this day.</p>;
+              }
+
+              // Group by type
+              const habits_items = items.filter(i => i.type === 'habit');
+              const todos_items = items.filter(i => i.type === 'todo');
+
+              return (
+                <>
+                  {habits_items.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ marginTop: 0, marginBottom: '0.75rem' }}>Habits Completed ({habits_items.length})</h3>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {habits_items.map(item => (
+                          <li key={item.id} style={{ 
+                            padding: '0.5rem 0',
+                            borderBottom: '1px solid var(--border)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <span>{item.title}</span>
+                            {item.category && (
+                              <span
+                                className="category-badge"
+                                style={{
+                                  backgroundColor: item.category.color + '20',
+                                  color: item.category.color,
+                                  border: `1px solid ${item.category.color}`,
+                                  fontSize: '0.75rem',
+                                  marginLeft: '0.5rem'
+                                }}
+                              >
+                                {item.category.name}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {todos_items.length > 0 && (
+                    <div>
+                      <h3 style={{ marginTop: 0, marginBottom: '0.75rem' }}>Todos Completed ({todos_items.length})</h3>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {todos_items.map(item => (
+                          <li key={item.id} style={{ 
+                            padding: '0.5rem 0',
+                            borderBottom: '1px solid var(--border)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <span>{item.title}</span>
+                            {item.category && (
+                              <span
+                                className="category-badge"
+                                style={{
+                                  backgroundColor: item.category.color + '20',
+                                  color: item.category.color,
+                                  border: `1px solid ${item.category.color}`,
+                                  fontSize: '0.75rem',
+                                  marginLeft: '0.5rem'
+                                }}
+                              >
+                                {item.category.name}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
-        ))}
-      </div>
+        </Modal>
+      )}
     </>
   );
 }
