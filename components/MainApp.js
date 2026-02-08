@@ -4,6 +4,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
   const [habits, setHabits] = useState([]);
   const [todos, setTodos] = useState([]);
   const [completions, setCompletions] = useState([]);
+  const [navOpen, setNavOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -300,42 +301,52 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
       <header className="header">
         <h1>Habits &amp; Todos</h1>
         <nav className="nav">
-          <a
-            className={`nav-link ${page === 'categories' ? 'active' : ''}`}
-            onClick={() => setPage('categories')}
+          <button
+            className={`nav-toggle ${navOpen ? 'open' : ''}`}
+            onClick={() => setNavOpen(!navOpen)}
+            aria-expanded={navOpen}
+            aria-label="Toggle navigation"
           >
-            Categories
-          </a>
-          <a
-            className={`nav-link ${page === 'habits' ? 'active' : ''}`}
-            onClick={() => setPage('habits')}
-          >
-            Habits
-          </a>
-          <a
-            className={`nav-link ${page === 'todos' ? 'active' : ''}`}
-            onClick={() => setPage('todos')}
-          >
-            Todos
-          </a>
-          <a
-            className={`nav-link ${page === 'calendar' ? 'active' : ''}`}
-            onClick={() => setPage('calendar')}
-          >
-            Calendar
-          </a>
-          <a
-            className={`nav-link ${page === 'stats' ? 'active' : ''}`}
-            onClick={() => setPage('stats')}
-          >
-            Stats
-          </a>
-          <button className="theme-toggle" onClick={toggleTheme}>
-            {theme === 'light' ? '🌙' : '☀️'}
+            ☰
           </button>
-          <a className="nav-link" onClick={onLogout}>
-            Logout
-          </a>
+          <div className={`nav-links ${navOpen ? 'open' : ''}`}>
+            <a
+              className={`nav-link ${page === 'categories' ? 'active' : ''}`}
+              onClick={() => { setPage('categories'); setNavOpen(false); }}
+            >
+              Categories
+            </a>
+            <a
+              className={`nav-link ${page === 'habits' ? 'active' : ''}`}
+              onClick={() => { setPage('habits'); setNavOpen(false); }}
+            >
+              Habits
+            </a>
+            <a
+              className={`nav-link ${page === 'todos' ? 'active' : ''}`}
+              onClick={() => { setPage('todos'); setNavOpen(false); }}
+            >
+              Todos
+            </a>
+            <a
+              className={`nav-link ${page === 'calendar' ? 'active' : ''}`}
+              onClick={() => { setPage('calendar'); setNavOpen(false); }}
+            >
+              Calendar
+            </a>
+            <a
+              className={`nav-link ${page === 'stats' ? 'active' : ''}`}
+              onClick={() => { setPage('stats'); setNavOpen(false); }}
+            >
+              Stats
+            </a>
+            <button className="theme-toggle" onClick={() => { toggleTheme(); setNavOpen(false); }}>
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <a className="nav-link" onClick={() => { onLogout(); setNavOpen(false); }}>
+              Logout
+            </a>
+          </div>
         </nav>
       </header>
 
