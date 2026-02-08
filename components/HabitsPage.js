@@ -206,7 +206,7 @@ function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
               </div>
             </div>
           );
-        })
+        })}
       </div>
 
       <button className="add-btn" onClick={() => {
