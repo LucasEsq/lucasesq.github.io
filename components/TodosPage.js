@@ -85,6 +85,7 @@ function TodosPage({ todos, categories, completions, onAdd, onDelete, onEdit }) 
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'done', 'not-done'
   const [sortDifficulty, setSortDifficulty] = useState('none'); // 'none', 'asc', 'desc'
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   // Check if a todo is completed
   const isTodoCompleted = (todoId) => {
@@ -173,12 +174,12 @@ function TodosPage({ todos, categories, completions, onAdd, onDelete, onEdit }) 
 
         {filteredTodos.map((todo) => {
           const category = categories.find((c) => c.id === todo.category_id);
+          const isDropdownOpen = openDropdown === todo.id;
 
           return (
             <div key={todo.id} className="item-card">
               <div className="item-info">
-                <h3>{todo.title}</h3>
-
+                <h3 className="item-title">{todo.title}</h3>
                 <div className="item-meta">
                   {category && (
                     <span
@@ -194,30 +195,42 @@ function TodosPage({ todos, categories, completions, onAdd, onDelete, onEdit }) 
                   )}
                   {todo.difficulty && <Stars count={todo.difficulty} />}
                 </div>
-
                 {todo.description && (
                   <p className="item-description">{todo.description}</p>
                 )}
               </div>
 
-              <div className="item-actions">
+              <div className="item-actions-dropdown">
                 <button
-                  className="icon-btn"
-                  onClick={() => {
-                    setEditingTodo(todo);
-                    setShowModal(true);
-                  }}
-                  title="Edit"
+                  className="icon-btn menu-toggle"
+                  onClick={() => setOpenDropdown(isDropdownOpen ? null : todo.id)}
+                  title="Actions"
                 >
-                  ✏
+                  ⋮
                 </button>
-                <button
-                  className="icon-btn"
-                  onClick={() => onDelete(todo.id)}
-                  title="Delete"
-                >
-                  🗑
-                </button>
+                {isDropdownOpen && (
+                  <div className="dropdown-menu">
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        setEditingTodo(todo);
+                        setShowModal(true);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      ✏ Edit
+                    </button>
+                    <button
+                      className="dropdown-item danger"
+                      onClick={() => {
+                        onDelete(todo.id);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      🗑 Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );

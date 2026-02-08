@@ -84,6 +84,7 @@ function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
   const [editingHabit, setEditingHabit] = useState(null);
   const [filterCategory, setFilterCategory] = useState('');
   const [sortDifficulty, setSortDifficulty] = useState('none'); // 'none', 'asc', 'desc'
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   // Filter and sort habits
   let filteredHabits = habits.filter(habit => {
@@ -145,12 +146,12 @@ function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
 
         {filteredHabits.map((habit) => {
           const category = categories.find((c) => c.id === habit.category_id);
+          const isDropdownOpen = openDropdown === habit.id;
 
           return (
             <div key={habit.id} className="item-card">
               <div className="item-info">
-                <h3>{habit.title}</h3>
-
+                <h3 className="item-title">{habit.title}</h3>
                 <div className="item-meta">
                   {category && (
                     <span
@@ -166,34 +167,46 @@ function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
                   )}
                   {habit.difficulty && <Stars count={habit.difficulty} />}
                 </div>
-
                 {habit.description && (
                   <p className="item-description">{habit.description}</p>
                 )}
               </div>
 
-              <div className="item-actions">
+              <div className="item-actions-dropdown">
                 <button
-                  className="icon-btn"
-                  onClick={() => {
-                    setEditingHabit(habit);
-                    setShowModal(true);
-                  }}
-                  title="Edit"
+                  className="icon-btn menu-toggle"
+                  onClick={() => setOpenDropdown(isDropdownOpen ? null : habit.id)}
+                  title="Actions"
                 >
-                  ✏
+                  ⋮
                 </button>
-                <button
-                  className="icon-btn"
-                  onClick={() => onDelete(habit.id)}
-                  title="Delete"
-                >
-                  🗑
-                </button>
+                {isDropdownOpen && (
+                  <div className="dropdown-menu">
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        setEditingHabit(habit);
+                        setShowModal(true);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      ✏ Edit
+                    </button>
+                    <button
+                      className="dropdown-item danger"
+                      onClick={() => {
+                        onDelete(habit.id);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      🗑 Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
-        })}
+        })
       </div>
 
       <button className="add-btn" onClick={() => {
