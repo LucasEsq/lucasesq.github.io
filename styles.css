@@ -264,6 +264,23 @@ textarea {
     width: 100%;
     text-align: left;
   }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .day-selector {
+    width: 100%;
+  }
+
+  .category-filter {
+    width: 100%;
+  }
 }
 
 /* Category Badge */
@@ -649,8 +666,17 @@ textarea {
 }
 
 /* Stats */
+.stats-controls {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .stats-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -659,6 +685,18 @@ textarea {
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 2rem;
+}
+
+.habit-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.habit-stat-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
 }
 
 .stat-value {
@@ -686,10 +724,87 @@ textarea {
   transition: width 0.3s ease;
 }
 
+/* Habit Circle Chart */
+.habit-circle-chart {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 1.5rem 0;
+}
+
+.circle-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circle-bg {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+
+.circle-fill {
+  fill: none;
+  stroke-width: 6;
+  transition: stroke-dasharray 0.3s ease;
+  stroke-linecap: round;
+}
+
+.circle-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.circle-percentage {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.circle-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Completion Dots */
+.completion-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 0.5rem 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dot.empty {
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.dot.completed {
+  border: 1px solid currentColor;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.dot:hover {
+  transform: scale(1.3);
+}
+
 .day-selector {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
@@ -708,6 +823,27 @@ textarea {
   color: white;
   border-color: var(--accent);
 }
+
+.category-filter {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: 'Crimson Pro', serif;
+  transition: all 0.2s;
+}
+
+.category-filter:hover {
+  border-color: var(--accent);
+}
+
+.category-filter:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
+}
+
 
 .day-btn:hover {
   border-color: var(--accent);

@@ -1,5 +1,6 @@
 function StatsPage({ habits, todos, completions, categories }) {
   const [days, setDays] = useState(7);
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const getHabitStats = (habitId, numDays) => {
     const dates = [];
@@ -13,8 +14,26 @@ function StatsPage({ habits, todos, completions, categories }) {
       completions.some(c => c.item_id === habitId && c.item_type === 'habit' && c.date === date)
     ).length;
 
-    return Math.round((completed / numDays) * 100);
+    return { completed, total: numDays };
   };
+
+  // Get habit completion dates for the dot display
+  const getHabitCompletionDates = (habitId, numDays) => {
+    const dates = [];
+    for (let i = numDays - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const isCompleted = completions.some(c => c.item_id === habitId && c.item_type === 'habit' && c.date === dateStr);
+      dates.push({ date: dateStr, completed: isCompleted });
+    }
+    return dates;
+  };
+
+  // Filter habits by selected category
+  const filteredHabits = selectedCategory === 'all'
+    ? habits
+    : habits.filter(h => h.category_id === selectedCategory);
 
   const getTodoCompletionsByDay = () => {
     const byDay = {};
@@ -66,32 +85,97 @@ function StatsPage({ habits, todos, completions, categories }) {
 
   return (
     <>
-      <div className="day-selector">
-        {[7, 14, 30].map(d => (
-          <button
-            key={d}
-            className={`day-btn ${days === d ? 'active' : ''}`}
-            onClick={() => setDays(d)}
-          >
-            {d} days
-          </button>
-        ))}
+      <div className="stats-controls">
+        <div className="day-selector">
+          {[7, 14, 30].map(d => (
+            <button
+              key={d}
+              className={`day-btn ${days === d ? 'active' : ''}`}
+              onClick={() => setDays(d)}
+            >
+              {d} days
+            </button>
+          ))}
+        </div>
+
+        <select
+          className="category-filter"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="all">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
       </div>
 
-      <h2>Habit Completion Rates</h2>
+      <h2>Habit Stats</h2>
       <div className="stats-grid">
-        {habits.length === 0 && (
-          <div className="empty-state">No habits to show stats for.</div>
+        {filteredHabits.length === 0 && (
+          <div className="empty-state">
+            {selectedCategory === 'all' 
+              ? 'No habits to show stats for.' 
+              : 'No habits in this category.'}
+          </div>
         )}
-        {habits.map(habit => {
-          const percentage = getHabitStats(habit.id, days);
+        {filteredHabits.map(habit => {
+          const { completed, total } = getHabitStats(habit.id, days);
+          const percentage = Math.round((completed / total) * 100);
+          const category = habit.category_id 
+            ? categories.find(c => c.id === habit.category_id) 
+            : null;
+          const completionDates = getHabitCompletionDates(habit.id, days);
+
           return (
-            <div key={habit.id} className="stat-card">
+            <div key={habit.id} className="stat-card habit-stat-card">
               <h3>{habit.title}</h3>
-              <div className="stat-value">{percentage}%</div>
-              <div className="stat-label">completed in last {days} days</div>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${percentage}%` }} />
+              {category && (
+                <span
+                  className="category-badge"
+                  style={{
+                    backgroundColor: category.color + '20',
+                    color: category.color,
+                    border: `1px solid ${category.color}`,
+                    fontSize: '0.85rem',
+                    marginBottom: '1rem'
+                  }}
+                >
+                  {category.name}
+                </span>
+              )}
+              
+              {/* Circle Chart */}
+              <div className="habit-circle-chart">
+                <svg viewBox="0 0 120 120" className="circle-svg">
+                  <circle cx="60" cy="60" r="50" className="circle-bg" />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    className="circle-fill"
+                    style={{
+                      strokeDasharray: `${(percentage / 100) * 314} 314`,
+                      stroke: category ? category.color : 'var(--accent)'
+                    }}
+                  />
+                </svg>
+                <div className="circle-text">
+                  <div className="circle-percentage">{percentage}%</div>
+                  <div className="circle-label">{completed}/{total} days</div>
+                </div>
+              </div>
+
+              {/* Completion Dots */}
+              <div className="completion-dots">
+                {completionDates.map(({ date, completed: isCompleted }, idx) => (
+                  <div
+                    key={idx}
+                    className={`dot ${isCompleted ? 'completed' : 'empty'}`}
+                    style={isCompleted && category ? { backgroundColor: category.color } : {}}
+                    title={new Date(date + 'T00:00:00').toLocaleDateString()}
+                  />
+                ))}
               </div>
             </div>
           );
