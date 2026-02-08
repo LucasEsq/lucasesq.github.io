@@ -286,9 +286,9 @@ textarea {
 /* Category Badge */
 .category-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
+  padding: 0.18rem 0.45rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -296,7 +296,7 @@ textarea {
 .stars {
   display: inline-flex;
   gap: 0.25rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .star {
@@ -337,17 +337,18 @@ textarea {
 /* Items List */
 .items-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.45rem;
 }
 
 .item-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 1rem;
+  padding: 0.6rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.6rem;
+  border-radius: 6px;
   transition: border-color 0.2s;
 }
 
@@ -356,31 +357,35 @@ textarea {
 }
 
 .item-title {
-  font-size: 1.1rem;
-  margin-bottom: 0.4rem;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
 }
 
 .item-info h3 {
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
 }
 
 .item-meta {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   align-items: center;
-  margin-top: 0.3rem;
+  margin-top: 0.2rem;
   flex-wrap: wrap;
 }
 
 .item-description {
   color: var(--muted);
-  font-size: 0.9rem;
-  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .item-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -390,9 +395,10 @@ textarea {
 }
 
 .menu-toggle {
-  padding: 0.4rem 0.5rem;
-  min-width: 40px;
-  min-height: 40px;
+  padding: 0.25rem 0.35rem;
+  min-width: 34px;
+  min-height: 34px;
+  font-size: 0.95rem;
 }
 
 .dropdown-menu {
@@ -403,21 +409,21 @@ textarea {
   border: 1px solid var(--border);
   box-shadow: 0 4px 12px var(--shadow);
   z-index: 1000;
-  min-width: 160px;
+  min-width: 140px;
   margin-top: 0.25rem;
 }
 
 .dropdown-item {
   display: block;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.9rem;
   text-align: left;
   border: none;
   background: none;
   color: var(--fg);
   cursor: pointer;
   font-family: 'Crimson Pro', serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: background-color 0.2s;
   white-space: nowrap;
 }
@@ -435,12 +441,12 @@ textarea {
   background: none;
   border: 1px solid var(--border);
   color: var(--fg);
-  padding: 0.5rem 0.75rem;
+  padding: 0.25rem 0.4rem;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 1rem;
-  min-height: 44px;
-  min-width: 44px;
+  font-size: 0.95rem;
+  min-height: 36px;
+  min-width: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
