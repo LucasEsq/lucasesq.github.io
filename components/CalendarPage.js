@@ -1,7 +1,19 @@
 function TimeSpentModal({ itemTitle, itemType, date, category, difficulty, onClose, onSave }) {
+  const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [error, setError] = useState(null);
   const quickOptions = [5, 10, 15, 25, 45, 60];
+
+  const normalizeTime = () => {
+    const h = Number(hours) || 0;
+    const m = Number(minutes) || 0;
+    const totalMinutes = h * 60 + m;
+    const normalizedHours = Math.floor(totalMinutes / 60);
+    const normalizedMinutes = totalMinutes % 60;
+    setHours(normalizedHours > 0 ? String(normalizedHours) : '');
+    setMinutes(normalizedMinutes > 0 ? String(normalizedMinutes) : '');
+  };
+
   const dateText = date
     ? date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -20,12 +32,18 @@ function TimeSpentModal({ itemTitle, itemType, date, category, difficulty, onClo
 
   const handleSubmit = () => {
     setError(null);
-    const value = Number(minutes);
-    if (!Number.isFinite(value) || value < 0) {
-      setError('Enter time in minutes (0 or more).');
+    const h = Number(hours) || 0;
+    const m = Number(minutes) || 0;
+    const totalMinutes = h * 60 + m;
+    if (totalMinutes < 0) {
+      setError('Enter time in hours and/or minutes.');
       return;
     }
-    onSave(Math.round(value));
+    if (totalMinutes === 0) {
+      setError('Enter at least 1 minute.');
+      return;
+    }
+    onSave(totalMinutes);
   };
 
   return (
@@ -61,31 +79,48 @@ function TimeSpentModal({ itemTitle, itemType, date, category, difficulty, onClo
         )}
       </div>
       <div className="form-group">
-        <label>Task</label>
+        <label style={{ fontSize: '0.9rem', marginBottom: '0.3rem' }}>Task</label>
         <div style={{ fontSize: '0.95rem', color: 'var(--muted)' }}>
           {itemTitle || 'Selected task'}{itemType ? ` (${itemType})` : ''}
         </div>
       </div>
 
       <div className="form-group">
-        <label>Date</label>
+        <label style={{ fontSize: '0.9rem', marginBottom: '0.3rem' }}>Date</label>
         <div style={{ fontSize: '0.95rem', color: 'var(--muted)' }}>
           {dateText}
         </div>
       </div>
 
       <div className="form-group">
-        <label>Time spent (minutes)</label>
-        <div className="time-input-row">
-          <input
-            type="number"
-            min="0"
-            step="1"
-            value={minutes}
-            onChange={(e) => setMinutes(e.target.value)}
-            autoFocus
-          />
-          <span className="time-unit">min</span>
+        <label>Time spent</label>
+        <div className="time-input-group">
+          <div className="time-input-pair">
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              onBlur={normalizeTime}
+              className="time-input"
+            />
+            <span className="time-input-label">hours</span>
+          </div>
+          <div className="time-input-pair">
+            <input
+              type="number"
+              min="0"
+              max="59"
+              step="1"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              onBlur={normalizeTime}
+              autoFocus
+              className="time-input"
+            />
+            <span className="time-input-label">minutes</span>
+          </div>
         </div>
         <div className="time-presets">
           {quickOptions.map((option) => (

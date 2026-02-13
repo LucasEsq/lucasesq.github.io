@@ -675,6 +675,40 @@ textarea {
   background: var(--surface);
 }
 
+.time-input-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.time-input-pair {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.time-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Crimson Pro', serif;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.time-input-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .time-presets {
   display: flex;
   flex-wrap: wrap;
