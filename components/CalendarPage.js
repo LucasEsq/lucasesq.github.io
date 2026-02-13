@@ -78,9 +78,10 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
 
   const renderItemWithMeta = (item, itemType) => {
     const category = categories.find((c) => c.id === item.category_id);
+    const completed = isCompleted(item.id, itemType);
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
-        <div style={{ fontWeight: '500' }}>{item.title}</div>
+        <div className="item-title" style={{ fontWeight: '500' }}>{item.title}</div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
           {category && (
             <span
@@ -100,6 +101,11 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
             <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
               {'★'.repeat(item.difficulty)}
             </div>
+          )}
+          {itemType === 'todo' && (
+            <span className={`status-pill ${completed ? 'done' : 'not-done'}`}>
+              {completed ? 'Done' : 'Not done'}
+            </span>
           )}
         </div>
         {item.description && (
@@ -237,7 +243,7 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
 
           {todosForDay.length > 0 ? (
             todosForDay.map(todo => (
-              <div key={todo.id} className="toggle-item">
+              <div key={todo.id} className={`toggle-item ${isCompleted(todo.id, 'todo') ? 'completed' : ''}`}>
                 {renderItemWithMeta(todo, 'todo')}
                 <div 
                   className={`checkbox ${isCompleted(todo.id, 'todo') ? 'checked' : ''}`}
@@ -313,27 +319,6 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
     return completions.filter(c => c.date === dateStr).length;
   };
 
-  const getHabitDotsForDate = (date, limit = 6) => {
-    const dateStr = date.toISOString().split('T')[0];
-    const dots = habits.map((habit) => {
-      const isCompleted = completions.some(
-        (c) => c.item_id === habit.id && c.item_type === 'habit' && c.date === dateStr
-      );
-      const category = habit.category_id
-        ? categories.find((c) => c.id === habit.category_id)
-        : null;
-      return {
-        id: habit.id,
-        completed: isCompleted,
-        color: category ? category.color : null
-      };
-    });
-
-    const visible = dots.slice(0, limit);
-    const overflow = dots.length - visible.length;
-    return { visible, overflow };
-  };
-
   const isSelected = (date) => {
     return date.toDateString() === selectedDate.toDateString();
   };
@@ -374,7 +359,6 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
             c.item_type === 'habit' && c.date === dateStr
           ).length;
           const totalHabits = habits.length;
-          const { visible, overflow } = getHabitDotsForDate(day.date);
           return (
             <div
               key={idx}
@@ -384,20 +368,6 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
               <div className="day-number">{day.date.getDate()}</div>
               {habitCompletions > 0 && (
                 <div className="day-indicator">{habitCompletions}/{totalHabits}</div>
-              )}
-              {habits.length > 0 && (
-                <div className="calendar-dots">
-                  {visible.map((dot) => (
-                    <span
-                      key={dot.id}
-                      className={`dot calendar-dot ${dot.completed ? 'completed' : 'empty'}`}
-                      style={dot.completed && dot.color ? { backgroundColor: dot.color, borderColor: dot.color } : {}}
-                    />
-                  ))}
-                  {overflow > 0 && (
-                    <span className="calendar-dots-overflow">+{overflow}</span>
-                  )}
-                </div>
               )}
             </div>
           );

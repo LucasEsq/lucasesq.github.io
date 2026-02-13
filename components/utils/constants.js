@@ -11,6 +11,8 @@ const CONSTANTS = {
     { value: 30, label: '30 days' },
     { value: 90, label: '90 days' }
   ],
+
+  HABIT_DOT_WINDOW_DAYS: 7,
   
   // Page names for navigation
   PAGES: {

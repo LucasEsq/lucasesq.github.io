@@ -748,6 +748,16 @@ textarea {
   background: var(--bg);
 }
 
+.toggle-item.completed {
+  background: rgba(0, 0, 0, 0.02);
+  opacity: 0.85;
+}
+
+.toggle-item.completed .item-title {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
 .toggle-item:last-child {
   border-bottom: none;
 }
@@ -955,33 +965,6 @@ textarea {
   flex-wrap: wrap;
 }
 
-.day-btn {
-  padding: 0.5rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--fg);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: 'Crimson Pro', serif;
-}
-
-.day-btn.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
-.category-filter {
-  padding: 0.5rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--fg);
-  cursor: pointer;
-  font-family: 'Crimson Pro', serif;
-  transition: all 0.2s;
-}
-
-.category-filter:hover {
   border-color: var(--accent);
 }
 

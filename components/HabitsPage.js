@@ -79,13 +79,15 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
   );
 }
 
-function HabitsPage({ habits, categories, completions = [], onAdd, onDelete, onEdit }) {
+function HabitsPage({ habits, categories, completions = [], completionWindowDays, onAdd, onDelete, onEdit }) {
   const [showModal, setShowModal] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [filterCategory, setFilterCategory] = useState('');
   const [sortDifficulty, setSortDifficulty] = useState('none'); // 'none', 'asc', 'desc'
   const [openDropdown, setOpenDropdown] = useState(null);
-  const completionWindowDays = 7;
+  const windowDays = typeof completionWindowDays === 'number'
+    ? completionWindowDays
+    : (window.CONSTANTS?.HABIT_DOT_WINDOW_DAYS || 7);
 
   const getHabitCompletionDates = (habitId, numDays) => {
     const dates = [];
@@ -162,7 +164,7 @@ function HabitsPage({ habits, categories, completions = [], onAdd, onDelete, onE
         {filteredHabits.map((habit) => {
           const category = categories.find((c) => c.id === habit.category_id);
           const isDropdownOpen = openDropdown === habit.id;
-          const completionDates = getHabitCompletionDates(habit.id, completionWindowDays);
+          const completionDates = getHabitCompletionDates(habit.id, windowDays);
 
           return (
             <div key={habit.id} className="item-card">
