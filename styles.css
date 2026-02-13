@@ -356,6 +356,17 @@ textarea {
   border-color: var(--accent);
 }
 
+.item-card-completed {
+  background: var(--bg);
+  border-color: var(--border);
+  opacity: 0.78;
+}
+
+.item-card-completed .item-title {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
 .item-title {
   font-size: 1rem;
   margin-bottom: 0.2rem;
@@ -371,6 +382,23 @@ textarea {
   align-items: center;
   margin-top: 0.2rem;
   flex-wrap: wrap;
+}
+
+.status-pill {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--bg);
+}
+
+.status-pill.done {
+  color: var(--success);
+  border-color: var(--success);
+  background: rgba(74, 124, 89, 0.12);
 }
 
 .item-description {
@@ -663,6 +691,34 @@ textarea {
   color: white;
 }
 
+.calendar-dots {
+  display: flex;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+.calendar-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.calendar-dots-overflow {
+  font-size: 0.6rem;
+  color: var(--muted);
+  margin-left: 0.1rem;
+}
+
+.calendar-day.selected .dot.empty {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.calendar-day.selected .calendar-dots-overflow {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* Day View */
 .day-view {
   background: var(--surface);
@@ -858,6 +914,17 @@ textarea {
   justify-content: center;
   margin-top: 1rem;
   padding: 0.5rem 0;
+}
+
+.completion-dots.compact {
+  justify-content: flex-start;
+  margin-top: 0.35rem;
+  padding: 0;
+}
+
+.completion-dots.compact .dot {
+  width: 6px;
+  height: 6px;
 }
 
 .dot {

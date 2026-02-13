@@ -362,6 +362,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
         <HabitsPage
           habits={habits}
           categories={categories}
+          completions={completions}
           onAdd={addHabit}
           onDelete={deleteHabit}
           onEdit={editHabit}

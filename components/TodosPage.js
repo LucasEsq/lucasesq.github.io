@@ -175,9 +175,10 @@ function TodosPage({ todos, categories, completions, onAdd, onDelete, onEdit }) 
         {filteredTodos.map((todo) => {
           const category = categories.find((c) => c.id === todo.category_id);
           const isDropdownOpen = openDropdown === todo.id;
+          const isCompleted = isTodoCompleted(todo.id);
 
           return (
-            <div key={todo.id} className="item-card">
+            <div key={todo.id} className={`item-card ${isCompleted ? 'item-card-completed' : ''}`}>
               <div className="item-info">
                 <h3 className="item-title">{todo.title}</h3>
                 <div className="item-meta">
@@ -194,6 +195,9 @@ function TodosPage({ todos, categories, completions, onAdd, onDelete, onEdit }) 
                     </span>
                   )}
                   {todo.difficulty && <Stars count={todo.difficulty} />}
+                  <span className={`status-pill ${isCompleted ? 'done' : 'not-done'}`}>
+                    {isCompleted ? 'Done' : 'Not done'}
+                  </span>
                 </div>
                 {todo.description && (
                   <p className="item-description">{todo.description}</p>

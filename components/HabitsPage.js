@@ -79,12 +79,27 @@ function HabitModal({ categories, onClose, onSave, editingHabit = null }) {
   );
 }
 
-function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
+function HabitsPage({ habits, categories, completions = [], onAdd, onDelete, onEdit }) {
   const [showModal, setShowModal] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [filterCategory, setFilterCategory] = useState('');
   const [sortDifficulty, setSortDifficulty] = useState('none'); // 'none', 'asc', 'desc'
   const [openDropdown, setOpenDropdown] = useState(null);
+  const completionWindowDays = 7;
+
+  const getHabitCompletionDates = (habitId, numDays) => {
+    const dates = [];
+    for (let i = numDays - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const isCompleted = completions.some(
+        (c) => c.item_id === habitId && c.item_type === 'habit' && c.date === dateStr
+      );
+      dates.push({ date: dateStr, completed: isCompleted });
+    }
+    return dates;
+  };
 
   // Filter and sort habits
   let filteredHabits = habits.filter(habit => {
@@ -147,6 +162,7 @@ function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
         {filteredHabits.map((habit) => {
           const category = categories.find((c) => c.id === habit.category_id);
           const isDropdownOpen = openDropdown === habit.id;
+          const completionDates = getHabitCompletionDates(habit.id, completionWindowDays);
 
           return (
             <div key={habit.id} className="item-card">
@@ -166,6 +182,16 @@ function HabitsPage({ habits, categories, onAdd, onDelete, onEdit }) {
                     </span>
                   )}
                   {habit.difficulty && <Stars count={habit.difficulty} />}
+                </div>
+                <div className="completion-dots compact">
+                  {completionDates.map(({ date, completed: isCompleted }, idx) => (
+                    <div
+                      key={idx}
+                      className={`dot ${isCompleted ? 'completed' : 'empty'}`}
+                      style={isCompleted && category ? { backgroundColor: category.color, borderColor: category.color } : {}}
+                      title={new Date(date + 'T00:00:00').toLocaleDateString()}
+                    />
+                  ))}
                 </div>
                 {habit.description && (
                   <p className="item-description">{habit.description}</p>
