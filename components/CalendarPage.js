@@ -1,6 +1,7 @@
-function TimeSpentModal({ itemTitle, itemType, date, onClose, onSave }) {
+function TimeSpentModal({ itemTitle, itemType, date, category, difficulty, onClose, onSave }) {
   const [minutes, setMinutes] = useState('');
   const [error, setError] = useState(null);
+  const quickOptions = [5, 10, 15, 25, 45, 60];
   const dateText = date
     ? date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -9,6 +10,13 @@ function TimeSpentModal({ itemTitle, itemType, date, onClose, onSave }) {
       day: 'numeric'
     })
     : '';
+  const stars = Number.isFinite(difficulty) ? difficulty : null;
+  const categoryName = category?.name || '';
+  const subtitle = stars
+    ? (categoryName
+      ? `You collected ${stars} stars in the category of ${categoryName}.`
+      : `You collected ${stars} stars.`)
+    : 'Log how much time you spent.';
 
   const handleSubmit = () => {
     setError(null);
@@ -22,12 +30,36 @@ function TimeSpentModal({ itemTitle, itemType, date, onClose, onSave }) {
 
   return (
     <FormModal
-      title="Time spent"
+      title="Finished!"
       onClose={onClose}
       onSubmit={handleSubmit}
       submitText="Save"
       error={error}
     >
+      <div className="completion-modal">
+        <div className="completion-subtitle">{subtitle}</div>
+        {(categoryName || stars) && (
+          <div className="completion-meta">
+            {categoryName && (
+              <span
+                className="category-badge"
+                style={{
+                  backgroundColor: category?.color ? category.color + '20' : 'transparent',
+                  color: category?.color || 'var(--fg)',
+                  border: category?.color ? `1px solid ${category.color}` : '1px solid var(--border)'
+                }}
+              >
+                {categoryName}
+              </span>
+            )}
+            {stars && (
+              <span className="completion-stars">
+                <Stars count={stars} />
+              </span>
+            )}
+          </div>
+        )}
+      </div>
       <div className="form-group">
         <label>Task</label>
         <div style={{ fontSize: '0.95rem', color: 'var(--muted)' }}>
@@ -44,14 +76,29 @@ function TimeSpentModal({ itemTitle, itemType, date, onClose, onSave }) {
 
       <div className="form-group">
         <label>Time spent (minutes)</label>
-        <input
-          type="number"
-          min="0"
-          step="1"
-          value={minutes}
-          onChange={(e) => setMinutes(e.target.value)}
-          autoFocus
-        />
+        <div className="time-input-row">
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={minutes}
+            onChange={(e) => setMinutes(e.target.value)}
+            autoFocus
+          />
+          <span className="time-unit">min</span>
+        </div>
+        <div className="time-presets">
+          {quickOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={`time-preset-btn ${String(option) === minutes ? 'active' : ''}`}
+              onClick={() => setMinutes(String(option))}
+            >
+              {option}m
+            </button>
+          ))}
+        </div>
       </div>
     </FormModal>
   );
@@ -283,7 +330,9 @@ function DayView({ date, habits, todos, categories, completions, onToggleRequest
                     'habit',
                     date,
                     isCompleted(habit.id, 'habit'),
-                    habit.title
+                      habit.title,
+                      categories.find((c) => c.id === habit.category_id) || null,
+                      habit.difficulty
                   )}
                 />
               </div>
@@ -357,7 +406,9 @@ function DayView({ date, habits, todos, categories, completions, onToggleRequest
                     'todo',
                     date,
                     isCompleted(todo.id, 'todo'),
-                    todo.title
+                      todo.title,
+                      categories.find((c) => c.id === todo.category_id) || null,
+                      todo.difficulty
                   )}
                 />
               </div>
@@ -435,7 +486,7 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
     return date.toDateString() === selectedDate.toDateString();
   };
 
-  const handleToggleRequest = (itemId, itemType, date, isCompleted, itemTitle) => {
+  const handleToggleRequest = (itemId, itemType, date, isCompleted, itemTitle, category, difficulty) => {
     if (isCompleted) {
       onToggle(itemId, itemType, date);
       return;
@@ -444,7 +495,9 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
       itemId,
       itemType,
       date,
-      itemTitle
+      itemTitle,
+      category,
+      difficulty
     });
   };
 
@@ -525,6 +578,8 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
           itemTitle={pendingCompletion.itemTitle}
           itemType={pendingCompletion.itemType}
           date={pendingCompletion.date}
+          category={pendingCompletion.category}
+          difficulty={pendingCompletion.difficulty}
           onClose={() => setPendingCompletion(null)}
           onSave={handleSaveTimeSpent}
         />

@@ -634,6 +634,74 @@ textarea {
   flex: 1;
 }
 
+.completion-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.completion-subtitle {
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.completion-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.completion-stars .stars {
+  font-size: 1rem;
+}
+
+.time-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.time-input-row input[type="number"] {
+  flex: 1;
+}
+
+.time-unit {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.time-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.time-preset-btn {
+  padding: 0.35rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Crimson Pro', serif;
+}
+
+.time-preset-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.time-preset-btn:hover {
+  border-color: var(--accent);
+}
+
 /* Calendar */
 .calendar {
   display: grid;
