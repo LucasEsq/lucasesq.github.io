@@ -85,9 +85,21 @@ function HabitsPage({ habits, categories, completions = [], completionWindowDays
   const [filterCategory, setFilterCategory] = useState('');
   const [sortDifficulty, setSortDifficulty] = useState('none'); // 'none', 'asc', 'desc'
   const [openDropdown, setOpenDropdown] = useState(null);
-  const windowDays = typeof completionWindowDays === 'number'
+  const storageKey = window.CONSTANTS?.STORAGE_KEYS?.HABIT_DOT_WINDOW || 'habit_dot_window';
+  const storedWindowDays = typeof window !== 'undefined'
+    ? Number(localStorage.getItem(storageKey))
+    : NaN;
+  const defaultWindowDays = typeof completionWindowDays === 'number'
     ? completionWindowDays
-    : (window.CONSTANTS?.HABIT_DOT_WINDOW_DAYS || 7);
+    : (!Number.isNaN(storedWindowDays) && storedWindowDays > 0
+      ? storedWindowDays
+      : (window.CONSTANTS?.HABIT_DOT_WINDOW_DAYS || 7));
+  const [windowDays, setWindowDays] = useState(defaultWindowDays);
+  const dotWindowOptions = window.CONSTANTS?.TIME_PERIODS || [
+    { value: 7, label: '7 days' },
+    { value: 14, label: '14 days' },
+    { value: 30, label: '30 days' }
+  ];
 
   const getHabitCompletionDates = (habitId, numDays) => {
     const dates = [];
@@ -151,6 +163,27 @@ function HabitsPage({ habits, categories, completions = [], completionWindowDays
             <option value="asc">Increasing</option>
             <option value="desc">Decreasing</option>
           </select>
+        </div>
+
+        <div>
+          <label style={{ marginRight: '0.5rem' }}>Dot window:</label>
+          <div className="day-selector">
+            {dotWindowOptions.map((option) => (
+              <button
+                key={option.value}
+                className={`day-btn ${windowDays === option.value ? 'active' : ''}`}
+                onClick={() => {
+                  setWindowDays(option.value);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem(storageKey, String(option.value));
+                  }
+                }}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

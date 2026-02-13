@@ -41,7 +41,8 @@ const CONSTANTS = {
   // Local storage keys
   STORAGE_KEYS: {
     THEME: 'theme',
-    LAST_PAGE: 'last_page'
+    LAST_PAGE: 'last_page',
+    HABIT_DOT_WINDOW: 'habit_dot_window'
   },
   
   // Calendar configuration

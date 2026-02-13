@@ -13,6 +13,17 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
     month: 'long', 
     day: 'numeric' 
   });
+  const habitDotWindowDays = (() => {
+    if (typeof window === 'undefined') {
+      return 7;
+    }
+    const storageKey = window.CONSTANTS?.STORAGE_KEYS?.HABIT_DOT_WINDOW || 'habit_dot_window';
+    const storedValue = Number(localStorage.getItem(storageKey));
+    if (!Number.isNaN(storedValue) && storedValue > 0) {
+      return storedValue;
+    }
+    return window.CONSTANTS?.HABIT_DOT_WINDOW_DAYS || 7;
+  })();
 
   const isCompleted = (itemId, itemType) => {
     return completions.some(
@@ -22,6 +33,20 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
 
   const isTodoCompletedAnyDay = (todoId) => {
     return completions.some(c => c.item_id === todoId && c.item_type === 'todo');
+  };
+
+  const getHabitCompletionDates = (habitId, numDays) => {
+    const dates = [];
+    for (let i = numDays - 1; i >= 0; i--) {
+      const dotDate = new Date(date);
+      dotDate.setDate(dotDate.getDate() - i);
+      const dotDateStr = dotDate.toISOString().split('T')[0];
+      const completed = completions.some(
+        (c) => c.item_id === habitId && c.item_type === 'habit' && c.date === dotDateStr
+      );
+      dates.push({ date: dotDateStr, completed });
+    }
+    return dates;
   };
 
   // Filter and sort habits
@@ -79,6 +104,9 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
   const renderItemWithMeta = (item, itemType) => {
     const category = categories.find((c) => c.id === item.category_id);
     const completed = isCompleted(item.id, itemType);
+    const habitCompletionDates = itemType === 'habit'
+      ? getHabitCompletionDates(item.id, habitDotWindowDays)
+      : [];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
         <div className="item-title" style={{ fontWeight: '500' }}>{item.title}</div>
@@ -108,6 +136,18 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
             </span>
           )}
         </div>
+        {itemType === 'habit' && (
+          <div className="completion-dots compact">
+            {habitCompletionDates.map(({ date: dotDate, completed: isCompleted }, idx) => (
+              <div
+                key={idx}
+                className={`dot ${isCompleted ? 'completed' : 'empty'}`}
+                style={isCompleted && category ? { backgroundColor: category.color, borderColor: category.color } : {}}
+                title={new Date(dotDate + 'T00:00:00').toLocaleDateString()}
+              />
+            ))}
+          </div>
+        )}
         {item.description && (
           <div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
             {item.description}
