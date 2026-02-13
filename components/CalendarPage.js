@@ -36,14 +36,10 @@ function TimeSpentModal({ itemTitle, itemType, date, category, difficulty, onClo
     const m = Number(minutes) || 0;
     const totalMinutes = h * 60 + m;
     if (totalMinutes < 0) {
-      setError('Enter time in hours and/or minutes.');
+      setError('Enter valid time.');
       return;
     }
-    if (totalMinutes === 0) {
-      setError('Enter at least 1 minute.');
-      return;
-    }
-    onSave(totalMinutes);
+    onSave(totalMinutes > 0 ? totalMinutes : null);
   };
 
   return (
