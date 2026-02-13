@@ -1,5 +1,5 @@
 function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
-  const [page, setPage] = useState('habits');
+  const [page, setPage] = useState('calendar');
   const [categories, setCategories] = useState([]);
   const [habits, setHabits] = useState([]);
   const [todos, setTodos] = useState([]);
