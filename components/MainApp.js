@@ -257,7 +257,7 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
     }
   };
 
-  const toggleCompletion = async (itemId, itemType, date) => {
+  const toggleCompletion = async (itemId, itemType, date, timeSpentMinutes = null) => {
     const dateStr = date.toISOString().split('T')[0];
     const existing = completions.find(
       (c) =>
@@ -270,6 +270,9 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
       await supabase.from('completions').delete().eq('id', existing.id);
       setCompletions(completions.filter((c) => c.id !== existing.id));
     } else {
+      const normalizedTimeSpent = Number.isFinite(timeSpentMinutes)
+        ? Math.max(0, Math.round(timeSpentMinutes))
+        : null;
       const { data } = await supabase
         .from('completions')
         .insert([
@@ -277,7 +280,8 @@ function MainApp({ user, encryptionKey, onLogout, theme, toggleTheme }) {
             user_id: user.id,
             item_id: itemId,
             item_type: itemType,
-            date: dateStr
+            date: dateStr,
+            time_spent_minutes: normalizedTimeSpent
           }
         ])
         .select();

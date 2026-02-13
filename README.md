@@ -78,9 +78,14 @@ CREATE TABLE completions (
   item_id UUID NOT NULL,
   item_type TEXT NOT NULL,
   date DATE NOT NULL,
+  time_spent_minutes INTEGER,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, item_id, item_type, date)
 );
+
+ALTER TABLE completions
+  ADD CONSTRAINT completions_time_spent_minutes_check
+  CHECK (time_spent_minutes IS NULL OR time_spent_minutes >= 0);
 
 -- Enable Row Level Security
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;

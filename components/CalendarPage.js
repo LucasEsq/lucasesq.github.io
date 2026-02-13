@@ -1,4 +1,63 @@
-function DayView({ date, habits, todos, categories, completions, onToggle }) {
+function TimeSpentModal({ itemTitle, itemType, date, onClose, onSave }) {
+  const [minutes, setMinutes] = useState('');
+  const [error, setError] = useState(null);
+  const dateText = date
+    ? date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+    : '';
+
+  const handleSubmit = () => {
+    setError(null);
+    const value = Number(minutes);
+    if (!Number.isFinite(value) || value < 0) {
+      setError('Enter time in minutes (0 or more).');
+      return;
+    }
+    onSave(Math.round(value));
+  };
+
+  return (
+    <FormModal
+      title="Time spent"
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      submitText="Save"
+      error={error}
+    >
+      <div className="form-group">
+        <label>Task</label>
+        <div style={{ fontSize: '0.95rem', color: 'var(--muted)' }}>
+          {itemTitle || 'Selected task'}{itemType ? ` (${itemType})` : ''}
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label>Date</label>
+        <div style={{ fontSize: '0.95rem', color: 'var(--muted)' }}>
+          {dateText}
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label>Time spent (minutes)</label>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          value={minutes}
+          onChange={(e) => setMinutes(e.target.value)}
+          autoFocus
+        />
+      </div>
+    </FormModal>
+  );
+}
+
+function DayView({ date, habits, todos, categories, completions, onToggleRequest }) {
   const [habitFilterCategory, setHabitFilterCategory] = useState('');
   const [habitFilterStatus, setHabitFilterStatus] = useState('all');
   const [habitSortDifficulty, setHabitSortDifficulty] = useState('none');
@@ -219,7 +278,13 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
                 {renderItemWithMeta(habit, 'habit')}
                 <div 
                   className={`checkbox ${isCompleted(habit.id, 'habit') ? 'checked' : ''}`}
-                  onClick={() => onToggle(habit.id, 'habit', date)}
+                  onClick={() => onToggleRequest(
+                    habit.id,
+                    'habit',
+                    date,
+                    isCompleted(habit.id, 'habit'),
+                    habit.title
+                  )}
                 />
               </div>
             ))
@@ -287,7 +352,13 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
                 {renderItemWithMeta(todo, 'todo')}
                 <div 
                   className={`checkbox ${isCompleted(todo.id, 'todo') ? 'checked' : ''}`}
-                  onClick={() => onToggle(todo.id, 'todo', date)}
+                  onClick={() => onToggleRequest(
+                    todo.id,
+                    'todo',
+                    date,
+                    isCompleted(todo.id, 'todo'),
+                    todo.title
+                  )}
                 />
               </div>
             ))
@@ -311,6 +382,7 @@ function DayView({ date, habits, todos, categories, completions, onToggle }) {
 function CalendarPage({ habits, todos, categories, completions, onToggle }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [pendingCompletion, setPendingCompletion] = useState(null);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -361,6 +433,32 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
 
   const isSelected = (date) => {
     return date.toDateString() === selectedDate.toDateString();
+  };
+
+  const handleToggleRequest = (itemId, itemType, date, isCompleted, itemTitle) => {
+    if (isCompleted) {
+      onToggle(itemId, itemType, date);
+      return;
+    }
+    setPendingCompletion({
+      itemId,
+      itemType,
+      date,
+      itemTitle
+    });
+  };
+
+  const handleSaveTimeSpent = (minutes) => {
+    if (!pendingCompletion) {
+      return;
+    }
+    onToggle(
+      pendingCompletion.itemId,
+      pendingCompletion.itemType,
+      pendingCompletion.date,
+      minutes
+    );
+    setPendingCompletion(null);
   };
 
   return (
@@ -420,8 +518,17 @@ function CalendarPage({ habits, todos, categories, completions, onToggle }) {
         todos={todos}
         categories={categories}
         completions={completions}
-        onToggle={onToggle}
+        onToggleRequest={handleToggleRequest}
       />
+      {pendingCompletion && (
+        <TimeSpentModal
+          itemTitle={pendingCompletion.itemTitle}
+          itemType={pendingCompletion.itemType}
+          date={pendingCompletion.date}
+          onClose={() => setPendingCompletion(null)}
+          onSave={handleSaveTimeSpent}
+        />
+      )}
     </>
   );
 }
