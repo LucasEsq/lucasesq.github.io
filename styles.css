@@ -965,6 +965,37 @@ textarea {
   flex-wrap: wrap;
 }
 
+.day-btn {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Crimson Pro', serif;
+}
+
+.day-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.day-btn:hover {
+  border-color: var(--accent);
+}
+
+.category-filter {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: 'Crimson Pro', serif;
+  transition: all 0.2s;
+}
+
+.category-filter:hover {
   border-color: var(--accent);
 }
 
@@ -972,11 +1003,6 @@ textarea {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.1);
-}
-
-
-.day-btn:hover {
-  border-color: var(--accent);
 }
 
 .category-stats {
